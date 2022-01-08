@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'timetable.dart';
+import 'timetable.dart';
 // import 'taskframe.dart';
 
 void main() => runApp(MyApp());
@@ -29,9 +29,7 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
         style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
     Text('Search Page',
         style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
-    Text('Profile Page',
-        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
-    // AppointmentWithoutWeekends(),
+    AppointmentWithoutWeekends(),
   ];
 
   void _onItemTapped(int index) {

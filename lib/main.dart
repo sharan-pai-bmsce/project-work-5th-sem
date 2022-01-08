@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 // import 'timetable.dart';
-// import 'taskframe.dart';
+import 'taskframe.dart';
 
 void main() => runApp(MyApp());
 
@@ -24,11 +24,9 @@ class MyNavigationBar extends StatefulWidget {
 class _MyNavigationBarState extends State<MyNavigationBar> {
   int _selectedIndex = 0;
   static List<Widget> _widgetOptions = <Widget>[
-    // TaskFrame(),
     Text('Home Page',
         style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
-    Text('Search Page',
-        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
+    TaskFrame(),
     Text('Profile Page',
         style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
     // AppointmentWithoutWeekends(),

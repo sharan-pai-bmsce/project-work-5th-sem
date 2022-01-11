@@ -1,8 +1,42 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'task_detail.dart';
+import 'task_body.dart';
+
+const TaskDetailRoute = '/task_detail';
+
+class Timetable extends StatelessWidget {
+  const Timetable({Key? key}) : super(key: key);
+  RouteFactory _route() {
+    return (settings) {
+      Widget screen;
+      Map<String, dynamic> arguments =
+          settings.arguments as Map<String, dynamic>;
+      // print(arguments.toString());
+      switch (settings.name) {
+        case '/':
+          screen = AppointmentWithoutWeekends();
+          break;
+        case TaskDetailRoute:
+          screen = TaskDetail(tasks: arguments);
+          break;
+        default:
+          return null;
+      }
+      return MaterialPageRoute(builder: (BuildContext context) => screen);
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        onGenerateRoute: _route(), home: AppointmentWithoutWeekends());
+  }
+}
 
 class AppointmentWithoutWeekends extends StatefulWidget {
   @override
@@ -10,7 +44,7 @@ class AppointmentWithoutWeekends extends StatefulWidget {
 }
 
 class CalendarAppointment extends State<AppointmentWithoutWeekends> {
-  final CalendarDataSource _dataSource = _DataSource(<Appointment>[]);
+  final CalendarDataSource _dataSource = _DataSource(<Task>[]);
   final List<String> _subjectCollection = <String>[];
   final List<DateTime> _startTimeCollection = <DateTime>[];
   final List<DateTime> _endTimeCollection = <DateTime>[];
@@ -19,9 +53,6 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
 
   @override
   void initState() {
-    _getSubjectCollection();
-    _getStartTimeCollection();
-    _getEndTimeCollection();
     _getColorCollection();
     super.initState();
   }
@@ -56,7 +87,23 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
 
             viewHeaderHeight: 55,
             headerHeight: 55,
-            // Month and year styling
+            appointmentTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+            onTap: (CalendarTapDetails ct) {
+              Task app = ct.appointments![0];
+              Navigator.pushNamed(context, TaskDetailRoute, arguments: {
+                "name": app.subject,
+                "notes": app.notes,
+                "Priority": app.priority,
+                "startTime": app.startTime,
+                "endTime": app.endTime,
+                "complete": app.isComplete,
+              });
+            },
+            // allowDragAndDrop: true, // Month and year styling
+            // allowAppointmentResize: true,
+            // onDragEnd: (appointmentDragEndDetails) {
+
+            // },
             showNavigationArrow: true,
             headerStyle: CalendarHeaderStyle(
                 backgroundColor: Colors.grey[850],
@@ -86,115 +133,81 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
   void viewChanged(ViewChangedDetails viewChangedDetails) {
     List<DateTime> visibleDates = viewChangedDetails.visibleDates;
     List<TimeRegion> _timeRegion = <TimeRegion>[];
-    List<Appointment> appointments = <Appointment>[];
+    List<Task> appointments = <Task>[];
 
     // This will refresh the window each time the window is loaded. For example when you switch from from 1 date to another previous appointment details will be present and new details will be loaded. This will scrub the previous data and
     _dataSource.appointments!.clear();
 
-    for (int i = 0; i < visibleDates.length; i++) {
-      // if (visibleDates[i].weekday == 6 || visibleDates[i].weekday == 7) {
-      //   continue;
-      // }
-      _timeRegion.add(TimeRegion(
-          startTime: DateTime(visibleDates[i].year, visibleDates[i].month,
-              visibleDates[i].day, 13, 0, 0),
-          endTime: DateTime(visibleDates[i].year, visibleDates[i].month,
-              visibleDates[i].day, 13, 15, 0),
-          text: 'Break',
-          color: Colors.blueGrey[300],
-          textStyle: TextStyle(fontSize: 10, color: Colors.white),
-          enablePointerInteraction: false));
-      SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
-        setState(() {
-          _specialTimeRegion = _timeRegion;
-        });
-      });
-      for (int j = 0; j < _startTimeCollection.length; j++) {
-        DateTime startTime = new DateTime(
-            visibleDates[i].year,
-            visibleDates[i].month,
-            visibleDates[i].day,
-            _startTimeCollection[j].hour,
-            _startTimeCollection[j].minute,
-            _startTimeCollection[j].second);
-        DateTime endTime = new DateTime(
-            visibleDates[i].year,
-            visibleDates[i].month,
-            visibleDates[i].day,
-            _endTimeCollection[j].hour,
-            _endTimeCollection[j].minute,
-            _endTimeCollection[j].second);
-        Random random = Random();
-        appointments.add(Appointment(
-            startTime: startTime,
-            endTime: endTime,
-            subject: _subjectCollection[random.nextInt(9)],
-            color: _colorCollection[random.nextInt(9)]));
-      }
+    // for (int i = 0; i < visibleDates.length; i++) {
+    // if (visibleDates[i].weekday == 6 || visibleDates[i].weekday == 7) {
+    //   continue;
+    // }
+    // _timeRegion.add(TimeRegion(
+    //     startTime: DateTime(visibleDates[i].year, visibleDates[i].month,
+    //         visibleDates[i].day, 13, 0, 0),
+    //     endTime: DateTime(visibleDates[i].year, visibleDates[i].month,
+    //         visibleDates[i].day, 13, 15, 0),
+    //     text: 'Break',
+    //     color: Colors.blueGrey[300],
+    //     textStyle: TextStyle(fontSize: 10, color: Colors.white),
+    //     enablePointerInteraction: false));
+    // SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
+    //   setState(() {
+    //     _specialTimeRegion = _timeRegion;
+    //   });
+    // });
+    DateTime start = DateTime(2022, 1, 11, 10, 30);
+    List<Map<String, dynamic>> val = [
+      {
+        "name": "Lab Record",
+        "time": 120,
+        "priority": 4,
+        "notes": "CN lab record expt 9 and 10"
+      },
+      {
+        "name": "Project Planning",
+        "time": 70,
+        "priority": 4,
+        "notes": "Implement mauraundar's Map"
+      },
+      {
+        "name": "Play Call of Duty 2",
+        "time": 30,
+        "priority": 2,
+        "notes": "Kill some Nazis"
+      },
+    ];
+    // List<Map<String, dynamic>>  = [];
+    for (var element in val) {
+      element.putIfAbsent("start", () => start);
+      element.putIfAbsent(
+          "end", () => start.add(Duration(minutes: element["time"])));
+      start = start.add(Duration(minutes: element["time"]));
     }
+    for (var element in val) {
+      DateTime startTime = DateTime(
+          element["start"].year,
+          element["start"].month,
+          element["start"].day,
+          element["start"].hour,
+          element["start"].minute);
+      DateTime endTime = DateTime(element["end"].year, element["end"].month,
+          element["end"].day, element["end"].hour, element["end"].minute);
+      var random = Random();
+      appointments.add(Task(
+          priority: element['priority'],
+          startTime: startTime,
+          endTime: endTime,
+          notes: element['notes'],
+          subject: element["name"],
+          color: _colorCollection[random.nextInt(9)]));
+    }
+    // }
     for (int i = 0; i < appointments.length; i++) {
       _dataSource.appointments!.add(appointments[i]);
     }
     _dataSource.notifyListeners(
         CalendarDataSourceAction.reset, _dataSource.appointments!);
-  }
-
-  void _getSubjectCollection() {
-    _subjectCollection.add('General Meeting');
-    _subjectCollection.add('Plan Execution');
-    _subjectCollection.add('Project Plan');
-    _subjectCollection.add('Consulting');
-    _subjectCollection.add('Support');
-    _subjectCollection.add('Development Meeting');
-    _subjectCollection.add('Scrum');
-    _subjectCollection.add('Project Completion');
-    _subjectCollection.add('Release updates');
-    _subjectCollection.add('Performance Check');
-  }
-
-  void _getStartTimeCollection() {
-    var currentDateTime = DateTime.now();
-
-    _startTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 9, 0, 0));
-    _startTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 10, 0, 0));
-    _startTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 11, 0, 0));
-    _startTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 12, 0, 0));
-    _startTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 14, 0, 0));
-    _startTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 15, 0, 0));
-    _startTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 16, 0, 0));
-    _startTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 17, 0, 0));
-    _startTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 18, 0, 0));
-  }
-
-  void _getEndTimeCollection() {
-    var currentDateTime = DateTime.now();
-    _endTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 10, 0, 0));
-    _endTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 11, 0, 0));
-    _endTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 12, 0, 0));
-    _endTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 13, 0, 0));
-    _endTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 15, 0, 0));
-    _endTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 16, 0, 0));
-    _endTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 17, 0, 0));
-    _endTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 18, 0, 0));
-    _endTimeCollection.add(new DateTime(currentDateTime.year,
-        currentDateTime.month, currentDateTime.day, 19, 0, 0));
   }
 
   void _getColorCollection() {
@@ -212,7 +225,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
 }
 
 class _DataSource extends CalendarDataSource {
-  _DataSource(List<Appointment> source) {
+  _DataSource(List<Task> source) {
     appointments = source;
   }
 }

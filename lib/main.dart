@@ -29,7 +29,7 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
         style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
     Text('Search Page',
         style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
-    AppointmentWithoutWeekends(),
+    Timetable(),
   ];
 
   void _onItemTapped(int index) {

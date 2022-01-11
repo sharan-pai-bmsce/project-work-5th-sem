@@ -10,8 +10,8 @@ class Task extends Appointment {
       {required String subject,
       required DateTime startTime,
       required DateTime endTime,
-      bool isComplete = false,
-      required int priority,
+      this.isComplete = false,
+      required this.priority,
       String notes = "",
       Color color = Colors.orangeAccent})
       : super(

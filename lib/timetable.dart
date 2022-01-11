@@ -87,13 +87,13 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
 
             viewHeaderHeight: 55,
             headerHeight: 55,
-            appointmentTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+            appointmentTextStyle: TextStyle(color: Colors.white, fontSize: 16),
             onTap: (CalendarTapDetails ct) {
               Task app = ct.appointments![0];
               Navigator.pushNamed(context, TaskDetailRoute, arguments: {
                 "name": app.subject,
                 "notes": app.notes,
-                "Priority": app.priority,
+                "priority": app.priority,
                 "startTime": app.startTime,
                 "endTime": app.endTime,
                 "complete": app.isComplete,
@@ -109,6 +109,10 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
                 backgroundColor: Colors.grey[850],
                 textStyle: TextStyle(color: Colors.grey[400], fontSize: 30)),
             timeSlotViewSettings: TimeSlotViewSettings(
+                timeIntervalHeight: 40,
+                timeInterval: Duration(minutes: 30),
+                timeFormat: 'hh:mm a',
+                timeRulerSize: 70,
                 timeTextStyle: TextStyle(color: Colors.white)),
             resourceViewSettings: ResourceViewSettings(
                 displayNameTextStyle: TextStyle(color: Colors.black)),
@@ -138,25 +142,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
     // This will refresh the window each time the window is loaded. For example when you switch from from 1 date to another previous appointment details will be present and new details will be loaded. This will scrub the previous data and
     _dataSource.appointments!.clear();
 
-    // for (int i = 0; i < visibleDates.length; i++) {
-    // if (visibleDates[i].weekday == 6 || visibleDates[i].weekday == 7) {
-    //   continue;
-    // }
-    // _timeRegion.add(TimeRegion(
-    //     startTime: DateTime(visibleDates[i].year, visibleDates[i].month,
-    //         visibleDates[i].day, 13, 0, 0),
-    //     endTime: DateTime(visibleDates[i].year, visibleDates[i].month,
-    //         visibleDates[i].day, 13, 15, 0),
-    //     text: 'Break',
-    //     color: Colors.blueGrey[300],
-    //     textStyle: TextStyle(fontSize: 10, color: Colors.white),
-    //     enablePointerInteraction: false));
-    // SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
-    //   setState(() {
-    //     _specialTimeRegion = _timeRegion;
-    //   });
-    // });
-    DateTime start = DateTime(2022, 1, 11, 10, 30);
+    DateTime start = DateTime(2022, 1, 11, 12, 30);
     List<Map<String, dynamic>> val = [
       {
         "name": "Lab Record",

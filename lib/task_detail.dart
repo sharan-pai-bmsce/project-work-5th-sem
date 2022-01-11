@@ -28,7 +28,43 @@ class TaskDetail extends StatelessWidget {
                 topRight: Radius.circular(70),
               )),
           child: Column(
-            children: [],
+            children: [
+              Divider(height: 30),
+              ListTile(
+                  leading: Icon(Icons.notes, color: Colors.white),
+                  title: Text(
+                    "Notes:",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 30,
+                    ),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+                  subtitle: Text(
+                    tasks["notes"],
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  )),
+              Divider(height: 30),
+              ListTile(
+                  leading: Icon(Icons.notes, color: Colors.white),
+                  title: Text(
+                    "Priority:",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 30,
+                    ),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+                  subtitle: Text(
+                    tasks["priority"].toString(),
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  )),
+              Divider(height: 30),
+            ],
           )),
     );
   }

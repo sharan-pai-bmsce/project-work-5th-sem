@@ -62,75 +62,84 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-          body: Container(
-        padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
-        // decoration: BoxDecoration(
-        //     image: DecorationImage(
-        //   image: AssetImage('Assets/nature-1.jpg'),
-        //   fit: BoxFit.cover,
-        // )),
-        child: SafeArea(
-          child: SfCalendar(
-            backgroundColor: Colors.grey[900],
-            cellBorderColor: Colors.white,
+        body: Container(
+          padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
+          // decoration: BoxDecoration(
+          //     image: DecorationImage(
+          //   image: AssetImage('Assets/nature-1.jpg'),
+          //   fit: BoxFit.cover,
+          // )),
+          child: SafeArea(
+            child: SfCalendar(
+              backgroundColor: Colors.grey[900],
+              cellBorderColor: Colors.white,
 
-            // Date and day styling
-            viewHeaderStyle: const ViewHeaderStyle(
-                dateTextStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold),
-                dayTextStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold)),
+              // Date and day styling
+              viewHeaderStyle: const ViewHeaderStyle(
+                  dateTextStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold),
+                  dayTextStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold)),
 
-            viewHeaderHeight: 55,
-            headerHeight: 55,
-            appointmentTextStyle: TextStyle(color: Colors.white, fontSize: 16),
-            onTap: (CalendarTapDetails ct) {
-              Task app = ct.appointments![0];
-              Navigator.pushNamed(context, TaskDetailRoute, arguments: {
-                "name": app.subject,
-                "notes": app.notes,
-                "priority": app.priority,
-                "startTime": app.startTime,
-                "endTime": app.endTime,
-                "complete": app.isComplete,
-              });
-            },
-            // allowDragAndDrop: true, // Month and year styling
-            // allowAppointmentResize: true,
-            // onDragEnd: (appointmentDragEndDetails) {
+              viewHeaderHeight: 55,
+              headerHeight: 55,
+              appointmentTextStyle:
+                  TextStyle(color: Colors.white, fontSize: 16),
+              onTap: (CalendarTapDetails ct) {
+                bool state = ct.appointments!.length > 0 ? true : false;
+                if (state) {
+                  Task app = ct.appointments![0];
+                  Navigator.pushNamed(context, TaskDetailRoute, arguments: {
+                    "name": app.subject,
+                    "notes": app.notes,
+                    "priority": app.priority,
+                    "startTime": app.startTime,
+                    "endTime": app.endTime,
+                    "complete": app.isComplete,
+                  });
+                }
+              },
+              // allowDragAndDrop: true, // Month and year styling
+              // allowAppointmentResize: true,
+              // onDragEnd: (appointmentDragEndDetails) {
 
-            // },
-            showNavigationArrow: true,
-            headerStyle: CalendarHeaderStyle(
-                backgroundColor: Colors.grey[850],
-                textStyle: TextStyle(color: Colors.grey[400], fontSize: 30)),
-            timeSlotViewSettings: TimeSlotViewSettings(
-                timeIntervalHeight: 40,
-                timeInterval: Duration(minutes: 30),
-                timeFormat: 'hh:mm a',
-                timeRulerSize: 70,
-                timeTextStyle: TextStyle(color: Colors.white)),
-            resourceViewSettings: ResourceViewSettings(
-                displayNameTextStyle: TextStyle(color: Colors.black)),
-            todayHighlightColor: Colors.orange[300],
-            dataSource: _dataSource,
-            monthViewSettings: MonthViewSettings(
-                monthCellStyle: MonthCellStyle(
-                    textStyle: TextStyle(color: Colors.white),
-                    todayBackgroundColor: Colors.orange[300],
-                    leadingDatesBackgroundColor: Colors.grey[700])),
-            view: CalendarView.day,
+              // },
+              showNavigationArrow: true,
+              headerStyle: CalendarHeaderStyle(
+                  backgroundColor: Colors.grey[850],
+                  textStyle: TextStyle(color: Colors.grey[400], fontSize: 30)),
+              timeSlotViewSettings: TimeSlotViewSettings(
+                  timeIntervalHeight: 40,
+                  timeInterval: Duration(minutes: 30),
+                  timeFormat: 'hh:mm a',
+                  timeRulerSize: 70,
+                  timeTextStyle: TextStyle(color: Colors.white)),
+              resourceViewSettings: ResourceViewSettings(
+                  displayNameTextStyle: TextStyle(color: Colors.black)),
+              todayHighlightColor: Colors.orange[300],
+              dataSource: _dataSource,
+              monthViewSettings: MonthViewSettings(
+                  monthCellStyle: MonthCellStyle(
+                      textStyle: TextStyle(color: Colors.white),
+                      todayBackgroundColor: Colors.orange[300],
+                      leadingDatesBackgroundColor: Colors.grey[700])),
+              view: CalendarView.day,
 
-            allowedViews: [CalendarView.day, CalendarView.month],
-            onViewChanged: viewChanged,
-            specialRegions: _specialTimeRegion,
+              allowedViews: [CalendarView.day, CalendarView.month],
+              onViewChanged: viewChanged,
+              specialRegions: _specialTimeRegion,
+            ),
           ),
         ),
-      )),
+        floatingActionButton: FloatingActionButton(
+            child: Icon(Icons.edit),
+            backgroundColor: Colors.grey[800],
+            onPressed: () {}),
+      ),
     );
   }
 
@@ -143,7 +152,8 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
     _dataSource.appointments!.clear();
 
     DateTime start = DateTime(2022, 1, 11, 12, 30);
-    List<Map<String, dynamic>> val = [
+    List<Map<String, dynamic>> val;
+    val = [
       {
         "name": "Lab Record",
         "time": 120,

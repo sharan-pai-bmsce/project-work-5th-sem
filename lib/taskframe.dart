@@ -17,9 +17,11 @@ class _TaskFrameState extends State<TaskFrame> {
   String _time = "Approx. time to complete";
   int limit = 120;
   String name = "";
+  String note = "";
   int pri = 0, time = 0;
   TextEditingController priorityController = new TextEditingController();
   TextEditingController titleController = new TextEditingController();
+  TextEditingController noteController = new TextEditingController();
 
   List<Map<String, dynamic>> tasks = [];
 
@@ -152,6 +154,17 @@ class _TaskFrameState extends State<TaskFrame> {
                               )))),
                 ),
                 Divider(height: 40),
+                ListTile(
+                  leading: Icon(Icons.note_add, color: Colors.white),
+                  title: TextField(
+                      controller: noteController,
+                      style: TextStyle(color: Colors.white),
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: "Note",
+                        hintStyle: TextStyle(color: Colors.white),
+                      )),
+                ),
               ],
             ),
           ),
@@ -163,7 +176,7 @@ class _TaskFrameState extends State<TaskFrame> {
                     primary: Colors.grey[700],
                   ),
                   onPressed: () async {
-                    // var file = await _localFile1;
+                    var file = await _localFile1;
                     DateTime dateN = DateTime.now();
                     String date = dateN.day.toString() +
                         "-" +
@@ -181,8 +194,6 @@ class _TaskFrameState extends State<TaskFrame> {
                       "date": date,
                       "Tasks": tasks,
                     };
-                    // file.writeAsString(jsonEncode(res),
-                    // mode: FileMode.writeOnly);
                     tasks.sort((a, b) {
                       if (a["priority"] < b["priority"]) {
                         return 1;
@@ -195,6 +206,8 @@ class _TaskFrameState extends State<TaskFrame> {
                       }
                       return 0;
                     });
+                    file.writeAsString(jsonEncode(res),
+                        mode: FileMode.writeOnly);
                     print(jsonEncode(res));
                     // file.readAsString().then((content) {
                     //   String date = content.substring(
@@ -212,6 +225,7 @@ class _TaskFrameState extends State<TaskFrame> {
                 child: ElevatedButton(
                     onPressed: () async {
                       name = titleController.text;
+
                       if (name == "") {
                         titleController.clear();
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -242,10 +256,12 @@ class _TaskFrameState extends State<TaskFrame> {
                       print(pri);
                       print(time);
                       limit -= time;
+                      note = noteController.text;
                       Map<String, dynamic> x = {
                         "name": name,
                         "time": time,
-                        "priority": pri
+                        "priority": pri,
+                        "note": note == "" ? "No note was added" : note,
                       };
                       tasks.add(x);
                       titleController.clear();

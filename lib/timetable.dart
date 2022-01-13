@@ -194,26 +194,13 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
       DateTime endTime = DateTime(element["end"].year, element["end"].month,
           element["end"].day, element["end"].hour, element["end"].minute);
       var random = Random();
-      if (!element["isComplete"]) {
-        appointments.add(Task(
-            priority: element['priority'],
-            startTime: startTime,
-            endTime: endTime,
-            notes: element['notes'],
-            subject: element["name"],
-            isComplete: element["isComplete"],
-            color: _colorCollection[random.nextInt(9)]));
-      } else {
-        appointments.add(Task(
+      appointments.add(Task(
           priority: element['priority'],
           startTime: startTime,
           endTime: endTime,
           notes: element['notes'],
-          subject: "Done: " + element["name"],
-          isComplete: element["isComplete"],
-          color: Color(Colors.greenAccent[200].hashCode),
-        ));
-      }
+          subject: element["name"],
+          color: _colorCollection[random.nextInt(9)]));
     }
     // }
     for (int i = 0; i < appointments.length; i++) {

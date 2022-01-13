@@ -90,7 +90,11 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
               appointmentTextStyle:
                   TextStyle(color: Colors.white, fontSize: 16),
               onTap: (CalendarTapDetails ct) {
-                bool state = ct.appointments!.length > 0 ? true : false;
+                bool state = ct.appointments != null
+                    ? ct.appointments!.length > 0
+                        ? true
+                        : false
+                    : false;
                 if (state) {
                   Task app = ct.appointments![0];
                   Navigator.pushNamed(context, TaskDetailRoute, arguments: {
@@ -150,8 +154,8 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
 
     // This will refresh the window each time the window is loaded. For example when you switch from from 1 date to another previous appointment details will be present and new details will be loaded. This will scrub the previous data and
     _dataSource.appointments!.clear();
-
-    DateTime start = DateTime(2022, 1, 11, 12, 30);
+    DateTime x = DateTime.now();
+    DateTime start = DateTime(x.year, x.month, x.day, 12, 30);
     List<Map<String, dynamic>> val;
     val = [
       {
@@ -190,13 +194,26 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
       DateTime endTime = DateTime(element["end"].year, element["end"].month,
           element["end"].day, element["end"].hour, element["end"].minute);
       var random = Random();
-      appointments.add(Task(
+      if (!element["isComplete"]) {
+        appointments.add(Task(
+            priority: element['priority'],
+            startTime: startTime,
+            endTime: endTime,
+            notes: element['notes'],
+            subject: element["name"],
+            isComplete: element["isComplete"],
+            color: _colorCollection[random.nextInt(9)]));
+      } else {
+        appointments.add(Task(
           priority: element['priority'],
           startTime: startTime,
           endTime: endTime,
           notes: element['notes'],
-          subject: element["name"],
-          color: _colorCollection[random.nextInt(9)]));
+          subject: "Done: " + element["name"],
+          isComplete: element["isComplete"],
+          color: Color(Colors.greenAccent[200].hashCode),
+        ));
+      }
     }
     // }
     for (int i = 0; i < appointments.length; i++) {

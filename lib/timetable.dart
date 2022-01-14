@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'task_detail.dart';
 import 'task_body.dart';
+import 'utility.dart';
 
 const TaskDetailRoute = '/task_detail';
 
@@ -14,8 +15,8 @@ class Timetable extends StatelessWidget {
   RouteFactory _route() {
     return (settings) {
       Widget screen;
-      Map<String, dynamic> arguments =
-          settings.arguments as Map<String, dynamic>;
+      Task arguments = settings.arguments as Task;
+      print(arguments);
       // print(arguments.toString());
       switch (settings.name) {
         case '/':
@@ -64,11 +65,6 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
       home: Scaffold(
         body: Container(
           padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
-          // decoration: BoxDecoration(
-          //     image: DecorationImage(
-          //   image: AssetImage('Assets/nature-1.jpg'),
-          //   fit: BoxFit.cover,
-          // )),
           child: SafeArea(
             child: SfCalendar(
               backgroundColor: Colors.grey[900],
@@ -97,21 +93,14 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
                     : false;
                 if (state) {
                   Task app = ct.appointments![0];
-                  Navigator.pushNamed(context, TaskDetailRoute, arguments: {
-                    "name": app.subject,
-                    "notes": app.notes,
-                    "priority": app.priority,
-                    "startTime": app.startTime,
-                    "endTime": app.endTime,
-                    "complete": app.isComplete,
-                  });
+                  Navigator.pushNamed(
+                    context,
+                    TaskDetailRoute,
+                    arguments: app,
+                  );
                 }
               },
-              // allowDragAndDrop: true, // Month and year styling
-              // allowAppointmentResize: true,
-              // onDragEnd: (appointmentDragEndDetails) {
 
-              // },
               showNavigationArrow: true,
               headerStyle: CalendarHeaderStyle(
                   backgroundColor: Colors.grey[850],
@@ -147,65 +136,92 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
     );
   }
 
-  void viewChanged(ViewChangedDetails viewChangedDetails) {
+  void viewChanged(ViewChangedDetails viewChangedDetails) async {
     List<DateTime> visibleDates = viewChangedDetails.visibleDates;
     List<TimeRegion> _timeRegion = <TimeRegion>[];
     List<Task> appointments = <Task>[];
-
+    bool stat = false;
     // This will refresh the window each time the window is loaded. For example when you switch from from 1 date to another previous appointment details will be present and new details will be loaded. This will scrub the previous data and
     _dataSource.appointments!.clear();
-    DateTime x = DateTime.now();
-    DateTime start = DateTime(x.year, x.month, x.day, 12, 30);
-    List<Map<String, dynamic>> val;
-    val = [
-      {
-        "name": "Lab Record",
-        "time": 120,
-        "priority": 4,
-        "notes": "CN lab record expt 9 and 10"
-      },
-      {
-        "name": "Project Planning",
-        "time": 70,
-        "priority": 4,
-        "notes": "Implement mauraundar's Map"
-      },
-      {
-        "name": "Play Call of Duty 2",
-        "time": 30,
-        "priority": 2,
-        "notes": "Kill some Nazis"
-      },
-    ];
-    // List<Map<String, dynamic>>  = [];
-    for (var element in val) {
-      element.putIfAbsent("start", () => start);
-      element.putIfAbsent(
-          "end", () => start.add(Duration(minutes: element["time"])));
-      start = start.add(Duration(minutes: element["time"]));
-    }
-    for (var element in val) {
-      DateTime startTime = DateTime(
-          element["start"].year,
-          element["start"].month,
-          element["start"].day,
-          element["start"].hour,
-          element["start"].minute);
-      DateTime endTime = DateTime(element["end"].year, element["end"].month,
-          element["end"].day, element["end"].hour, element["end"].minute);
-      var random = Random();
-      appointments.add(Task(
-          priority: element['priority'],
-          startTime: startTime,
-          endTime: endTime,
-          notes: element['notes'],
-          subject: element["name"],
-          color: _colorCollection[random.nextInt(9)]));
-    }
+    // DateTime x = DateTime.now();
+    // DateTime start = DateTime(x.year, x.month, x.day, 12, 30);
+    Utility.localFile2.then((file) {
+      return file.exists().then((stat) {
+        if (stat) {
+          appointments.clear();
+          _dataSource.appointments!.clear();
+          file.readAsString().then((contents) {
+            if (contents != "") {
+              _dataSource.appointments!.clear();
+              Map<String, dynamic> contentJson = jsonDecode(contents as String);
+              for (var element in contentJson["Tasks"]) {
+                _dataSource.appointments!.add(Task(
+                  priority: element["priority"],
+                  subject: element["name"],
+                  startTime: DateTime.parse(element["startTime"]),
+                  endTime: DateTime.parse(element["endTime"]),
+                  isComplete: element["complete"],
+                  color: Color(element["color"]),
+                  notes: element["notes"],
+                ));
+              }
+              for (var element in contentJson["Completed"]) {
+                // print(element);
+                _dataSource.appointments!.add(Task(
+                  priority: element["priority"],
+                  subject: element["name"],
+                  startTime: DateTime.parse(element["startTime"]),
+                  endTime: DateTime.parse(element["endTime"]),
+                  isComplete: element["complete"],
+                  color: Color(element["color"]),
+                  notes: element["notes"],
+                ));
+              }
+              _dataSource.notifyListeners(
+                  CalendarDataSourceAction.reset, _dataSource.appointments!);
+            }
+          });
+        }
+      });
+    });
+    // appointments.clear();
+    // file.exists().then((value) {
+    //   print(value);
+    //   appointments.clear();
+    //   _dataSource.appointments!.clear();
+    //   if (value) {
+    //     file.readAsString().then((content) {
+    //       appointments.clear();
+    //       for (var element in val) {
+    //         element.putIfAbsent("start", () => start);
+    //         element.putIfAbsent(
+    //             "end", () => start.add(Duration(minutes: element["time"])));
+    //         start = start.add(Duration(minutes: element["time"]));
+    //       }
+    //       for (var element in val) {
+    //         DateTime startTime = DateTime(
+    //             element["start"].year,
+    //             element["start"].month,
+    //             element["start"].day,
+    //             element["start"].hour,
+    //             element["start"].minute);
+    //         DateTime endTime = DateTime(
+    //             element["end"].year,
+    //             element["end"].month,
+    //             element["end"].day,
+    //             element["end"].hour,
+    //             element["end"].minute);
+    //         var random = Random();
+    //       }
+    //       // print(_dataSource.appointments.toString());
+    //       for (int i = 0; i < appointments.length; i++) {
+    //         _dataSource.appointments!.add(appointments[i]);
+    //       }
+
+    // });
     // }
-    for (int i = 0; i < appointments.length; i++) {
-      _dataSource.appointments!.add(appointments[i]);
-    }
+    // });
+
     _dataSource.notifyListeners(
         CalendarDataSourceAction.reset, _dataSource.appointments!);
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'timetable.dart';
 import 'taskframe.dart';
+import 'utility.dart';
 
 void main() => runApp(MyApp());
 
@@ -33,6 +34,12 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
 
   void _onItemTapped(int index) {
     setState(() {
+      // Utility.localFile1.then((file) {
+      //   file.delete();
+      // });
+      // Utility.localFile2.then((file) {
+      //   file.delete();
+      // });
       _selectedIndex = index;
     });
   }

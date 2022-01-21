@@ -16,7 +16,7 @@ class Timetable extends StatelessWidget {
     return (settings) {
       Widget screen;
       Task arguments = settings.arguments as Task;
-      print(arguments);
+      // print(arguments);
       // print(arguments.toString());
       switch (settings.name) {
         case '/':
@@ -28,7 +28,8 @@ class Timetable extends StatelessWidget {
         default:
           return null;
       }
-      return MaterialPageRoute(builder: (BuildContext context) => screen);
+      return MaterialPageRoute(
+          builder: (BuildContext context) => screen, maintainState: false);
     };
   }
 
@@ -51,7 +52,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
   final List<DateTime> _endTimeCollection = <DateTime>[];
   final List<Color> _colorCollection = <Color>[];
   List<TimeRegion> _specialTimeRegion = <TimeRegion>[];
-
+  ViewChangedDetails? x = null;
   @override
   void initState() {
     _getColorCollection();
@@ -96,8 +97,14 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
                   Navigator.pushNamed(
                     context,
                     TaskDetailRoute,
+                    // (Route<dynamic> route) => false,
                     arguments: app,
-                  );
+                  ).then((value) {
+                    if (value == true && x != null) {
+                      viewChanged(x!);
+                    }
+                  });
+                  setState(() {});
                 }
               },
 
@@ -141,6 +148,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
     List<TimeRegion> _timeRegion = <TimeRegion>[];
     List<Task> appointments = <Task>[];
     bool stat = false;
+    x = viewChangedDetails;
     // This will refresh the window each time the window is loaded. For example when you switch from from 1 date to another previous appointment details will be present and new details will be loaded. This will scrub the previous data and
     _dataSource.appointments!.clear();
     // DateTime x = DateTime.now();

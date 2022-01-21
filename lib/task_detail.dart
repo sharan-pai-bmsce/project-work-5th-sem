@@ -77,7 +77,7 @@ class _TaskDetailState extends State<TaskDetail> {
                             };
                             file.writeAsString(jsonEncode(object),
                                 mode: FileMode.writeOnly);
-                            Navigator.pop(context);
+                            Navigator.pop(context, true);
                           });
                         }
                       });

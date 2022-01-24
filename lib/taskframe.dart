@@ -17,23 +17,42 @@ class TaskFrame extends StatefulWidget {
 
 class _TaskFrameState extends State<TaskFrame> {
   String _time = "Approx. time to complete";
-  int limit = 120;
+  int limit = 0;
   String name = "";
   String note = "";
+  List<dynamic> tasks = [];
   int pri = 0, time = 0;
   TextEditingController priorityController = new TextEditingController();
   TextEditingController titleController = new TextEditingController();
   TextEditingController noteController = new TextEditingController();
 
-  List<Map<String, dynamic>> tasks = [];
+  // List<Map<String, dynamic>> tasks = [];
   final List<Color> _colorCollection = <Color>[];
 
   String minConverter(Duration? time) {
-    if (time == null) return "Approx. time to complete";
-    if (time.inMinutes > limit) {
-      return "-1";
-    }
-    return time.inMinutes.toString() + " minutes";
+    // if (time == null) return "Approx. time to complete";
+    // if (time.inMinutes > limit) {
+    //   return "-1";
+    // }
+    return time!.inMinutes.toString() + " minutes";
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Utility.localFile1.then((file) {
+      file.exists().then((stat) {
+        if (stat) {
+          file.readAsString().then((contents) {
+            Map<String, dynamic> content = jsonDecode(contents);
+            limit = content["limit"];
+            tasks = content["Tasks"];
+            print(content);
+            // setState(() {});
+          });
+        }
+      });
+    });
   }
 
   @override
@@ -61,21 +80,21 @@ class _TaskFrameState extends State<TaskFrame> {
                 )),
             child: SingleChildScrollView(
                 child: Column(children: [
-              Container(
-                  padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
-                  margin: EdgeInsets.fromLTRB(30, 30, 30, 5),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    color: Colors.grey[700],
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      Text("Time Remaining: ",
-                          style: TextStyle(fontSize: 20, color: Colors.white)),
-                      Text(convert(limit),
-                          style: TextStyle(fontSize: 20, color: Colors.white)),
-                    ],
-                  )),
+              // Container(
+              //     padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+              //     margin: EdgeInsets.fromLTRB(30, 30, 30, 5),
+              //     decoration: BoxDecoration(
+              //       borderRadius: BorderRadius.all(Radius.circular(10)),
+              //       color: Colors.grey[700],
+              //     ),
+              //     child: Row(
+              //       children: <Widget>[
+              //         Text("Time Remaining: ",
+              //             style: TextStyle(fontSize: 20, color: Colors.white)),
+              //         Text(convert(limit),
+              //             style: TextStyle(fontSize: 20, color: Colors.white)),
+              //       ],
+              //     )),
               Container(
                 padding: EdgeInsets.fromLTRB(5, 10, 5, 40),
                 margin: EdgeInsets.fromLTRB(30, 20, 30, 40),
@@ -119,17 +138,17 @@ class _TaskFrameState extends State<TaskFrame> {
                                   initialTime: Duration(minutes: 30),
                                 );
                                 String val = minConverter(resultingDuration);
-                                if (val == "-1") {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                          content: Text(
-                                    'Choose duration crosses the limit',
-                                    style: TextStyle(color: Colors.redAccent),
-                                  )));
-                                  _time = "Approx. time to complete";
-                                } else {
-                                  _time = val;
-                                }
+                                // if (val == "-1") {
+                                //   ScaffoldMessenger.of(context)
+                                //       .showSnackBar(SnackBar(
+                                //           content: Text(
+                                //     'Choose duration crosses the limit',
+                                //     style: TextStyle(color: Colors.redAccent),
+                                //   )));
+                                //   _time = "Approx. time to complete";
+                                // } else {
+                                _time = val;
+                                // }
                                 setState(() {});
                               },
                               child: Align(
@@ -183,44 +202,44 @@ class _TaskFrameState extends State<TaskFrame> {
                             dateN.year.toString();
 
                         Map<String, dynamic> res = {
-                          "date": date,
+                          "limit": limit,
                           "Tasks": tasks,
                         };
-                        tasks.sort((a, b) {
-                          if (a["priority"] < b["priority"]) {
-                            return 1;
-                          } else if (a["priority"] == b["priority"]) {
-                            if (a["time"] > b["time"]) {
-                              return 1;
-                            } else {
-                              return 0;
-                            }
-                          }
-                          return 0;
-                        });
+                        // tasks.sort((a, b) {
+                        //   if (a["priority"] < b["priority"]) {
+                        //     return 1;
+                        //   } else if (a["priority"] == b["priority"]) {
+                        //     if (a["time"] > b["time"]) {
+                        //       return 1;
+                        //     } else {
+                        //       return 0;
+                        //     }
+                        //   }
+                        //   return 0;
+                        // });
 
-                        DateTime x = DateTime.now();
-                        DateTime start =
-                            DateTime(x.year, x.month, x.day, 12, 30);
-                        Random random = new Random();
-                        for (var element in tasks) {
-                          ttData.add({
-                            "name": element["name"],
-                            "startTime": start.toString(),
-                            "endTime": start
-                                .add(Duration(minutes: element["time"]))
-                                .toString(),
-                            "priority": element["priority"],
-                            "notes": element["notes"],
-                            "color": _colorCollection[random.nextInt(9)].value,
-                            "complete": false,
-                          });
-                          start = start.add(Duration(minutes: element["time"]));
-                        }
-                        Map<String, dynamic> y = {
-                          "Completed": [],
-                          "Tasks": ttData,
-                        };
+                        // DateTime x = DateTime.now();
+                        // DateTime start =
+                        //     DateTime(x.year, x.month, x.day, 12, 30);
+                        // Random random = new Random();
+                        // for (var element in tasks) {
+                        //   ttData.add({
+                        //     "name": element["name"],
+                        //     "startTime": start.toString(),
+                        //     "endTime": start
+                        //         .add(Duration(minutes: element["time"]))
+                        //         .toString(),
+                        //     "priority": element["priority"],
+                        //     "notes": element["notes"],
+                        //     "color": _colorCollection[random.nextInt(9)].value,
+                        //     "complete": false,
+                        //   });
+                        //   start = start.add(Duration(minutes: element["time"]));
+                        // }
+                        // Map<String, dynamic> y = {
+                        //   "Completed": [],
+                        //   "Tasks": ttData,
+                        // };
 
                         Utility.localFile1.then((file) {
                           file.writeAsString(jsonEncode(res),
@@ -228,12 +247,12 @@ class _TaskFrameState extends State<TaskFrame> {
                           file.readAsString().then((content) => print(content));
                         });
 
-                        Utility.localFile2.then((file) {
-                          file.writeAsString(jsonEncode(y),
-                              mode: FileMode.writeOnly);
+                        // Utility.localFile2.then((file) {
+                        //   file.writeAsString(jsonEncode(y),
+                        //       mode: FileMode.writeOnly);
 
-                          file.readAsString().then((content) => print(content));
-                        });
+                        //   file.readAsString().then((content) => print(content));
+                        // });
                       },
                       child: const Text(
                         'Generate Timetable',
@@ -276,7 +295,7 @@ class _TaskFrameState extends State<TaskFrame> {
                               int.parse(_time.substring(0, _time.indexOf(' ')));
                           print(pri);
                           print(time);
-                          limit -= time;
+                          limit += time;
                           note = noteController.text;
                           Map<String, dynamic> x = {
                             "name": name,

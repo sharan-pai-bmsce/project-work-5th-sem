@@ -17,6 +17,11 @@ class Utility {
     final path = await _localPath;
     return File('$path/timetable.json');
   }
+
+  static Future<File> get localFile3 async {
+    final path = await _localPath;
+    return File('$path/time_input.json');
+  }
 }
 
 

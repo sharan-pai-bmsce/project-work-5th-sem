@@ -20,10 +20,10 @@ class TaskDetail extends StatefulWidget {
 class _TaskDetailState extends State<TaskDetail> {
   Timer? _time;
   String tim = "";
-  bool timLabel = false;
+  int timLabel = 3;
   @override
   void initState() {
-    timLabel = time(widget.tasks.startTime);
+    timLabel = time(widget.tasks.startTime, widget.tasks.endTime);
     tim = timeLeft(widget.tasks.startTime, widget.tasks.endTime);
     // Timer.periodic(Duration(minutes: 1), (Timer t) => setState(() {}));
     // super.initState();
@@ -56,26 +56,11 @@ class _TaskDetailState extends State<TaskDetail> {
                       file.exists().then((status) {
                         if (status) {
                           file.readAsString().then((content) {
-                            Map<String, dynamic> object = jsonDecode(content);
-                            List<dynamic> tasks = object["Tasks"];
-                            tasks.removeWhere(
-                                (task) => task["name"] == widget.tasks.subject);
-                            List<dynamic> completed = object["Completed"];
-                            var val = {
-                              "name": widget.tasks.subject + " - Completed",
-                              "priority": widget.tasks.priority,
-                              "notes": widget.tasks.notes,
-                              "color": Colors.green[300]!.value,
-                              "startTime": widget.tasks.startTime.toString(),
-                              "endTime": widget.tasks.endTime.toString(),
-                              "complete": true,
-                            };
-                            completed.add(val);
-                            object = {
-                              "Completed": completed,
-                              "Tasks": tasks,
-                            };
-                            file.writeAsString(jsonEncode(object),
+                            List<dynamic> tasks = jsonDecode(content);
+                            tasks.removeWhere((element) =>
+                                element["startTime"] ==
+                                widget.tasks.startTime.toString());
+                            file.writeAsString(jsonEncode(tasks),
                                 mode: FileMode.writeOnly);
                             Navigator.pop(context, true);
                           });
@@ -88,8 +73,21 @@ class _TaskDetailState extends State<TaskDetail> {
                             file.readAsString().then((content) {
                               Map<String, dynamic> object = jsonDecode(content);
                               List<dynamic> tasks = object["Tasks"];
-                              tasks.removeWhere((task) =>
-                                  task["name"] == widget.tasks.subject);
+                              for (int i = 0; i < tasks.length; i++) {
+                                if (tasks[i]["name"] == widget.tasks.subject) {
+                                  tasks[i]["time"] += widget.tasks.startTime
+                                      .difference(widget.tasks.endTime)
+                                      .inMinutes;
+                                  if (tasks[i]["time"] <= 0) {
+                                    tasks.remove(tasks[i]);
+                                  }
+                                  object["limit"] +=
+                                      diff(widget.tasks.startTime)
+                                          .difference(widget.tasks.endTime)
+                                          .inMinutes;
+                                  break;
+                                }
+                              }
                               file.writeAsString(jsonEncode(object),
                                   mode: FileMode.writeOnly);
                             });
@@ -164,16 +162,11 @@ class _TaskDetailState extends State<TaskDetail> {
                       contentPadding:
                           EdgeInsets.symmetric(vertical: 10, horizontal: 30),
                       subtitle: Text(
-                        (widget.tasks.startTime.hour > 12
-                                    ? widget.tasks.startTime.hour - 12
-                                    : widget.tasks.startTime.hour == 0
-                                        ? 12
-                                        : widget.tasks.startTime.hour)
-                                .toString() +
+                        (widget.tasks.startTime.hour < 10 ? "0" : "") +
+                            widget.tasks.startTime.hour.toString() +
                             ":" +
-                            widget.tasks.startTime.minute.toString() +
-                            " " +
-                            (widget.tasks.startTime.hour < 12 ? "AM" : "PM"),
+                            (widget.tasks.startTime.minute < 10 ? "0" : "") +
+                            widget.tasks.startTime.minute.toString(),
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       )),
                   Divider(height: 30),
@@ -191,25 +184,47 @@ class _TaskDetailState extends State<TaskDetail> {
                       contentPadding:
                           EdgeInsets.symmetric(vertical: 10, horizontal: 30),
                       subtitle: Text(
-                        (widget.tasks.endTime.hour > 12
-                                    ? widget.tasks.endTime.hour - 12
-                                    : widget.tasks.endTime.hour == 0
-                                        ? 12
-                                        : widget.tasks.endTime.hour)
-                                .toString() +
+                        (widget.tasks.endTime.hour < 10 ? "0" : "") +
+                            widget.tasks.endTime.hour.toString() +
                             ":" +
-                            widget.tasks.endTime.minute.toString() +
-                            " " +
-                            (widget.tasks.endTime.hour < 12 ? "AM" : "PM"),
+                            (widget.tasks.endTime.minute < 10 ? "0" : "") +
+                            widget.tasks.endTime.minute.toString(),
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       )),
                   Divider(height: 30),
-                  !widget.tasks.isComplete
+                  ListTile(
+                      leading: Icon(Icons.access_alarms_outlined,
+                          color: Colors.white),
+                      title: Text(
+                        "Duration:",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 30,
+                        ),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+                      subtitle: Text(
+                        widget.tasks.endTime
+                                .difference(widget.tasks.startTime)
+                                .inMinutes
+                                .toString() +
+                            " mins",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      )),
+                  Divider(height: 30),
+                  !widget.tasks.isComplete &&
+                          DateTime.now().compareTo(widget.tasks.endTime) < 0
                       ? ListTile(
                           leading:
                               Icon(Icons.alarm_on_rounded, color: Colors.white),
                           title: Text(
-                            timLabel ? "Task will start in:" : "Time left:",
+                            timLabel == 1
+                                ? "Task will start in:"
+                                : timLabel == 2
+                                    ? "Time left:"
+                                    : "",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -232,19 +247,28 @@ class _TaskDetailState extends State<TaskDetail> {
   }
 }
 
-bool time(DateTime start) {
-  return DateTime.now().compareTo(start) < 0;
+int time(DateTime start, DateTime end) {
+  if (DateTime.now().compareTo(start) < 0) {
+    return 1;
+  } else if (DateTime.now().compareTo(end) < 0) {
+    return 2;
+  }
+  return 0;
 }
 
 String timeLeft(DateTime start, DateTime end) {
   DateTime d = DateTime.now();
   if (DateTime.now().compareTo(start) < 0) {
-    return (Duration(hours: start.hour, minutes: start.minute) -
-            Duration(hours: d.hour, minutes: d.minute))
-        .inMinutes
-        .toString();
+    return start.difference(DateTime.now()).inMinutes.toString();
+  } else if (DateTime.now().compareTo(end) < 0) {
+    return end.difference(DateTime.now()).inMinutes.toString();
   }
-  Duration timeleft = (Duration(hours: end.hour, minutes: end.minute) -
-      Duration(hours: d.hour, minutes: d.minute));
-  return timeleft.inMinutes.toString();
+  return "";
+}
+
+DateTime diff(DateTime start) {
+  if (start.compareTo(DateTime.now()) < 0) {
+    return DateTime.now();
+  }
+  return start;
 }

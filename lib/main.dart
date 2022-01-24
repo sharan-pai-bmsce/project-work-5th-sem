@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'timetable.dart';
 import 'taskframe.dart';
 import 'utility.dart';
+import 'time_input_frame.dart';
 
 void main() => runApp(MyApp());
 
@@ -26,9 +27,8 @@ class MyNavigationBar extends StatefulWidget {
 class _MyNavigationBarState extends State<MyNavigationBar> {
   int _selectedIndex = 0;
   static List<Widget> _widgetOptions = <Widget>[
-    Text('Home Page',
-        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
     TaskFrame(),
+    DateTimePicker(),
     Timetable(),
   ];
 
@@ -38,6 +38,9 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
       //   file.delete();
       // });
       // Utility.localFile2.then((file) {
+      //   file.delete();
+      // });
+      // Utility.localFile3.then((file) {
       //   file.delete();
       // });
       _selectedIndex = index;
@@ -53,13 +56,13 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
       bottomNavigationBar: BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: ('Time Input'),
+              icon: Icon(Icons.task_sharp),
+              label: ('Task Input'),
               backgroundColor: Colors.grey[850],
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.task_sharp),
-              label: ('Task Input'),
+              icon: Icon(Icons.access_alarms),
+              label: ('Time Input'),
               backgroundColor: Colors.grey[850],
             ),
             BottomNavigationBarItem(

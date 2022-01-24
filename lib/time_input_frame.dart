@@ -1,12 +1,10 @@
+import 'dart:io';
+import 'dart:math';
+import 'dart:ui';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-
-void main()
-{
-
-  runApp(DateTimePicker());
-}
+import 'utility.dart';
 
 class DateTimePicker extends StatefulWidget {
   @override
@@ -32,18 +30,24 @@ class _HomeScreenState extends State<HomeScreen> {
   String _date = "Not set";
   String timestart = "Not set";
   String timeend = "Not set";
-  DateTime ts = new DateTime.now();
-  DateTime td = new DateTime.now();
-
-  DateTime now = new DateTime.now();
+  String message = "";
+  DateTime ts = DateTime.now();
+  DateTime td = DateTime.now();
+  List<dynamic> time = [];
+  List<dynamic> ttData = [];
+  Map<String, dynamic> fileContents = {};
+  DateTime now = DateTime.now();
+  int limit = 0;
+  final List<Color> _colorCollection = <Color>[];
   Widget _buildAboutText() {
     return new RichText(
         text: new TextSpan(
-          text: 'Free End time can\'t be greater than Start Time\n\n',
-          style: const TextStyle(color: Colors.black87),
-        )
-    );
+      text: message,
+      // text: 'Free End time can\'t be greater than Start Time\n\n',
+      style: const TextStyle(color: Colors.black87),
+    ));
   }
+
   Widget _buildAboutDialog(BuildContext context) {
     return new AlertDialog(
       title: const Text('Error!'),
@@ -52,7 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           _buildAboutText(),
-
         ],
       ),
       actions: <Widget>[
@@ -66,9 +69,50 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
+
+  Widget needed(BuildContext context, String mes) {
+    message = mes;
+    return _buildAboutDialog(context);
+  }
+
   @override
   void initState() {
     super.initState();
+    _getColorCollection();
+    // Utility.localFile2.then((file) {
+    //   return file.readAsString();
+    // }).then((contents) {
+    //   fileContents = jsonDecode(contents);
+    //   // ttData = fileContents["Tasks"];
+    //   setState(() {});
+    // });
+    Utility.localFile1.then((file) {
+      return file.readAsString();
+    }).then((contents) {
+      fileContents = jsonDecode(contents);
+      limit = fileContents["limit"];
+      setState(() {});
+    });
+    Utility.localFile3.then((file) {
+      return file.readAsString();
+    }).then((contents) {
+      time = jsonDecode(contents);
+      print(time);
+      setState(() {});
+    });
+  }
+
+  void _getColorCollection() {
+    _colorCollection.add(const Color(0xFF0F8644));
+    _colorCollection.add(const Color(0xFF8B1FA9));
+    _colorCollection.add(const Color(0xFFD20100));
+    _colorCollection.add(const Color(0xFFFC571D));
+    _colorCollection.add(const Color(0xFF36B37B));
+    _colorCollection.add(const Color(0xFF01A1EF));
+    _colorCollection.add(const Color(0xFF3D4FB5));
+    _colorCollection.add(const Color(0xFFE47C73));
+    _colorCollection.add(const Color(0xFF636363));
+    _colorCollection.add(const Color(0xFF0A8043));
   }
 
   @override
@@ -77,28 +121,49 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.grey[850],
         title: Text('Fix My Life'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.list_alt),
+            onPressed: () {
+              print(limit);
+            },
+          )
+        ],
       ),
       backgroundColor: Colors.grey[900],
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(
           child: Column(
-
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
-
             children: <Widget>[
+              Container(
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                  margin: EdgeInsets.fromLTRB(10, 10, 10, 20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    color: Colors.grey[700],
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      Text("Time Remaining: ",
+                          style: TextStyle(fontSize: 20, color: Colors.white)),
+                      Text(limit > 0 ? convert(limit) : " 00:00",
+                          style: TextStyle(fontSize: 20, color: Colors.white)),
+                    ],
+                  )),
               Align(
                   alignment: Alignment.centerLeft,
-                 child: Text(
-                  "Date:",
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                      color: Colors.teal,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25.0),)),
-              Divider(height:7),
-
+                  child: Text(
+                    "Date:",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                        color: Colors.teal,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25.0),
+                  )),
+              Divider(height: 7),
 
               RaisedButton(
                 color: Colors.grey[850],
@@ -112,30 +177,28 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       showTitleActions: true,
                       // DateTime date = new DateTime(now.year, now.month, now.day);
-                      minTime: DateTime(now.year, now.month, now.day),
-                      maxTime: DateTime(now.year, now.month, now.day),
+                      minTime: DateTime(
+                          now.year, now.month, now.day, now.hour, now.minute),
+                      // maxTime: DateTime(now.year, now.month, now.day),
                       onConfirm: (date) {
-                        print('confirm $date');
-                        _date = '${date.year} - ${date.month} - ${date.day}';
-                        setState(() {});
-                      }, currentTime: DateTime.now(), locale: LocaleType.en);
+                    print('confirm $date');
+                    _date =
+                        '${date.year}-${date.month < 10 ? "0" : ""}${date.month}-${date.day}';
+                    setState(() {});
+                  }, currentTime: DateTime.now(), locale: LocaleType.en);
                 },
                 child: Container(
                   alignment: Alignment.center,
                   height: 50.0,
-                  decoration: BoxDecoration(
-                      color: Colors.grey[850]
-                  ),
+                  decoration: BoxDecoration(color: Colors.grey[850]),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Row(
                         children: <Widget>[
                           Container(
-
                             child: Row(
                               children: <Widget>[
-
                                 Icon(
                                   Icons.date_range,
                                   size: 18.0,
@@ -169,16 +232,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 20.0,
               ),
 
-            Align(
-            alignment: Alignment.centerLeft,
-                child: Text(
-                  "Start Time:",
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                      color: Colors.teal,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25.0),)),
-          Divider(height:7),
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Start Time:",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                        color: Colors.teal,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25.0),
+                  )),
+              Divider(height: 7),
               RaisedButton(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5.0)),
@@ -189,23 +253,52 @@ class _HomeScreenState extends State<HomeScreen> {
                         containerHeight: 210.0,
                       ),
                       showTitleActions: true, onConfirm: (time) {
-                        if(timeend!="Not set"&& time.isAfter(td))
-                          {
-
-
-                              print('end time $td greater than start');
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) => _buildAboutDialog(context),
-                              );
-
-                          }
-                        else if((timeend!="Not set"&& time.isBefore(td))||timeend=="Not set") {
-                          print('confirm $time');
-                          ts=time;
-                          timestart = '${time.hour} : ${time.minute} : ${time.second}';
-                          setState(() {});
-                      }}, currentTime: DateTime.now(), locale: LocaleType.en);
+                    if (_date == "Not set") {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => needed(context,
+                            'Set the date before setting the start timer.\n\n'),
+                      );
+                      setState(() {});
+                      return;
+                    }
+                    var d = DateTime.parse(_date.replaceAll(" ", "") +
+                        " " +
+                        (time.hour < 10 ? "0" : "") +
+                        time.hour.toString() +
+                        ":" +
+                        (time.minute < 10 ? "0" : "") +
+                        time.minute.toString() +
+                        ":00");
+                    if (timeend != "Not set" && time.isAfter(td)) {
+                      print('end time $td greater than start');
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => needed(context,
+                            'Free End time can\'t be greater than Start Time\n\n'),
+                      );
+                    } else if (d.isBefore(DateTime.now())) {
+                      print("Time less than current time.");
+                      timestart = "Not set";
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) => needed(
+                              context, "Entered time before current time.")
+                          // _buildAboutDialog(context),
+                          );
+                      setState(() {});
+                    } else if ((timeend != "Not set" && time.isBefore(td)) ||
+                        timeend == "Not set") {
+                      print('confirm $time');
+                      ts = time;
+                      timestart =
+                          '${(time.hour < 10 ? "0" : "")}${time.hour}:${(time.minute < 10 ? "0" : "")}${time.minute}';
+                      setState(() {});
+                    }
+                  },
+                      showSecondsColumn: false,
+                      currentTime: DateTime.now(),
+                      locale: LocaleType.en);
                   setState(() {});
                 },
                 child: Container(
@@ -260,8 +353,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(
                         color: Colors.teal,
                         fontWeight: FontWeight.bold,
-                        fontSize: 25.0),)),
-              Divider(height:7),
+                        fontSize: 25.0),
+                  )),
+              Divider(height: 7),
               RaisedButton(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5.0)),
@@ -272,24 +366,51 @@ class _HomeScreenState extends State<HomeScreen> {
                         containerHeight: 210.0,
                       ),
                       showTitleActions: true,
+                      showSecondsColumn: false,
                       //minTime: DateTime(ts.hour, ts.minute, ts.second),
                       onConfirm: (time) {
-
-
-                        if(time.isBefore(ts)&&timestart!="Not set")
-                        {
-                          print('end time $time greater than start');
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) => _buildAboutDialog(context),
+                    if (_date == "Not set") {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => needed(context,
+                            'Set the date before setting the end timer.\n\n'),
+                      );
+                      setState(() {});
+                      return;
+                    }
+                    // print(time);
+                    var d = DateTime.parse(_date.replaceAll(" ", "") +
+                        " " +
+                        (time.hour < 10 ? "0" : "") +
+                        time.hour.toString() +
+                        ":" +
+                        (time.minute < 10 ? "0" : "") +
+                        time.minute.toString() +
+                        ":00");
+                    // print(d);
+                    if (time.isBefore(ts) && timestart != "Not set") {
+                      print('end time $time greater than start');
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => needed(context,
+                            'Free End time can\'t be greater than Start Time\n\n'),
+                      );
+                    } else if (d.isBefore(DateTime.now())) {
+                      print("Time less than current time.");
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) => needed(
+                              context, "Entered time before current time.")
+                          // _buildAboutDialog(context),
                           );
-                        }
-                        else{
-                          print("confirm  $time");
-                          timeend = '${time.hour} : ${time.minute} : ${time.second}';
-                          td=time;
-                          setState(() {});
-                        }}, currentTime: DateTime.now(), locale: LocaleType.en);
+                    } else {
+                      print("confirm  $time");
+                      timeend =
+                          '${(time.hour < 10 ? "0" : "")}${time.hour}:${(time.minute < 10 ? "0" : "")}${time.minute}';
+                      td = time;
+                      setState(() {});
+                    }
+                  }, currentTime: DateTime.now(), locale: LocaleType.en);
                   setState(() {});
                 },
                 child: Container(
@@ -332,22 +453,270 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 color: Colors.grey[850],
               ),
-              Divider(height:30),
-              RaisedButton(
-                child: Text("Fix My Life!", style: TextStyle(fontSize: 20),),
-                onPressed: (){},
-                shape:RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0)),
-                color: Colors.grey[850],
-                textColor: Colors.teal,
-                padding: EdgeInsets.all(8.0),
-                splashColor: Colors.grey,
-              )
+              Divider(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  RaisedButton(
+                    child: Text(
+                      "Generate Timetable!",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    onPressed: () {
+                      // if (limit > 0) {
+                      //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      //       backgroundColor: Colors.redAccent[50],
+                      //       content: Text(
+                      //         'Cannot continue. You must add time equivalent to limit.',
+                      //         style: TextStyle(color: Colors.redAccent),
+                      //       )));
+                      //   setState(() {});
+                      //   return;
+                      // }
+                      time.sort((a, b) {
+                        if (DateTime.parse(a["date"] + " " + a["startTime"])
+                            .isBefore(DateTime.parse(
+                                b["date"] + " " + a["endTime"]))) {
+                          return -1;
+                        }
+                        return 1;
+                      });
+                      print(time);
+                      List<dynamic> tasks = fileContents["Tasks"];
+                      Random random = new Random();
+                      int trace = 0;
+                      int timeLeft = 0;
+                      tasks.sort((a, b) {
+                        if (a["priority"] < b["priority"]) {
+                          return 1;
+                        } else if (a["priority"] == b["priority"]) {
+                          if (a["time"] > b["time"]) {
+                            return 1;
+                          } else {
+                            return 0;
+                          }
+                        }
+                        return 0;
+                      });
+                      for (int j = 0; j < time.length; j++) {
+                        DateTime start = DateTime.parse(time[j]["date"] +
+                            " " +
+                            time[j]["startTime"] +
+                            ":00");
+                        int duration = time[j]["duration"];
+                        print(duration);
+                        // for (var element in tasks) {
+                        //   if (element["time"] <= duration) {
+                        //     ttData.add({
+                        //       "name": element["name"],
+                        //       "startTime": start.toString(),
+                        //       "endTime": start
+                        //           .add(Duration(minutes: element["time"]))
+                        //           .toString(),
+                        //       "priority": element["priority"],
+                        //       "notes": element["notes"],
+                        //       // "color": _colorCollection[random.nextInt(9)].value,
+                        //       "complete": false,
+                        //     });
+                        //     start =
+                        //         start.add(Duration(minutes: element["time"]));
+                        //     tasks.remove(element);
+                        //   } else {
+                        //     ttData.add({
+                        //       "name": element["name"],
+                        //       "startTime": start.toString(),
+                        //       "endTime": start
+                        //           .add(Duration(minutes: duration))
+                        //           .toString(),
+                        //       "priority": element["priority"],
+                        //       "notes": element["notes"],
+                        //       // "color": _colorCollection[random.nextInt(9)].value,
+                        //       "complete": false,
+                        //     });
+                        //     element["time"] -= duration;
+                        //     break;
+                        //   }
+                        // }
+
+                        for (int i = trace; i < tasks.length; i++) {
+                          if (tasks[i]["time"] - timeLeft <= duration) {
+                            ttData.add({
+                              "name": tasks[i]["name"],
+                              "startTime": start.toString(),
+                              "endTime": start
+                                  .add(Duration(
+                                      minutes: tasks[i]["time"] - timeLeft))
+                                  .toString(),
+                              "priority": tasks[i]["priority"],
+                              "notes": tasks[i]["notes"],
+                              "color":
+                                  _colorCollection[random.nextInt(9)].value,
+                              "complete": false,
+                            });
+                            start = start.add(
+                                Duration(minutes: tasks[i]["time"] - timeLeft));
+                            duration =
+                                (duration + timeLeft - tasks[i]["time"]) as int;
+                            trace = i + 1;
+                            timeLeft = 0;
+                            // tasks.remove(tasks[i]);
+                          } else {
+                            ttData.add({
+                              "name": tasks[i]["name"],
+                              "startTime": start.toString(),
+                              "endTime": start
+                                  .add(Duration(minutes: duration))
+                                  .toString(),
+                              "priority": tasks[i]["priority"],
+                              "notes": tasks[i]["notes"],
+                              "color":
+                                  _colorCollection[random.nextInt(9)].value,
+                              "complete": false,
+                            });
+                            timeLeft = duration;
+                            // tasks[i]["time"] -= duration;
+                            break;
+                          }
+                        }
+                      }
+
+                      Utility.localFile2.then((file) {
+                        file.writeAsString(jsonEncode(ttData),
+                            mode: FileMode.writeOnly);
+
+                        // file.readAsString().then((content) => print(content));
+                      });
+                      print(tasks);
+                      // print(time);
+                      // print(tasks);
+                      Utility.localFile1.then((file) {
+                        file.writeAsString(
+                            jsonEncode({
+                              "limit": limit,
+                              "Tasks": fileContents["Tasks"],
+                            }),
+                            mode: FileMode.writeOnly);
+                      });
+                      Utility.localFile3.then((file) {
+                        file.writeAsString(jsonEncode(time));
+                      });
+                    },
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)),
+                    color: Colors.grey[850],
+                    textColor: Colors.teal,
+                    padding: EdgeInsets.all(8.0),
+                    splashColor: Colors.grey,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                  ),
+                  RaisedButton(
+                    child: Text(
+                      "Add time",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    onPressed: () {
+                      if (timestart == "Not set") {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) => needed(
+                                context, "Cannot add time without start time!")
+                            // _buildAboutDialog(context),
+                            );
+                        print(limit);
+                        setState(() {});
+                        return;
+                      }
+                      if (timeend == "Not set") {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) => needed(
+                                context, "Cannot add time without end time!")
+                            // _buildAboutDialog(context),
+                            );
+                        setState(() {});
+                        return;
+                      }
+                      if (_date == "Not set") {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) =>
+                                needed(context, "Cannot add time without date!")
+                            // _buildAboutDialog(context),
+                            );
+                        setState(() {});
+                        return;
+                      }
+                      int duration = DateTime.parse("$_date $timeend:00")
+                          .difference(DateTime.parse("$_date $timestart:00"))
+                          .inMinutes;
+                      Map<String, dynamic> ele = {
+                        "date": _date,
+                        "startTime": timestart,
+                        "endTime": timeend,
+                        "duration": duration,
+                      };
+                      // print();
+                      if (!containment(time, ele)) {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) =>
+                                needed(context, "Time range already given!")
+                            // _buildAboutDialog(context),
+                            );
+                        timestart = "Not set";
+                        timeend = "Not set";
+                        setState(() {});
+                        return;
+                      }
+                      time.add(ele);
+                      _date = "Not set";
+                      timestart = "Not set";
+                      timeend = "Not set";
+                      limit -= duration;
+                      print(limit);
+                      setState(() {});
+                      print(time);
+                    },
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)),
+                    color: Colors.grey[850],
+                    textColor: Colors.teal,
+                    padding: EdgeInsets.all(8.0),
+                    splashColor: Colors.grey,
+                  )
+                ],
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  String convert(int time) {
+    int min = (time % 60);
+    int hour = ((time - min) / 60).floor();
+    String hs = hour < 9 ? "0" + hour.toString() : hour.toString();
+    String ms = min < 9 ? "0" + min.toString() : min.toString();
+    return hs + " : " + ms;
+  }
+
+  bool containment(List<dynamic> time, Map<String, dynamic> curr) {
+    DateTime ts = DateTime.parse(curr["date"] + " " + curr["startTime"]);
+    DateTime te = DateTime.parse(curr["date"] + " " + curr["endTime"]);
+    bool k = false;
+    for (var element in time) {
+      DateTime elets =
+          DateTime.parse(element["date"] + " " + element["startTime"]);
+      DateTime elete =
+          DateTime.parse(element["date"] + " " + element["endTime"]);
+      if (!(te.isBefore(elets) || ts.isAfter(elete))) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 

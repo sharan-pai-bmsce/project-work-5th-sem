@@ -13,6 +13,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   var _taskNameController = TextEditingController();
   var _taskDescriptionController = TextEditingController();
+  var _taskPriorityController = TextEditingController();
+  var _taskDurationController = TextEditingController();
 
   var _task = Task();
   var _taskService = TaskService();
@@ -23,6 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   var _edittaskNameController = TextEditingController();
   var _edittaskDescriptionController = TextEditingController();
+  var _edittaskPriorityController = TextEditingController();
+  var _edittasDurationController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -40,6 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
         taskModel.name = task['name'];
         taskModel.description = task['description'];
         taskModel.id = task['id'];
+        taskModel.priority = task['priority'];
+        taskModel.duration = task['duration'];
         _taskList.add(taskModel);
       });
     });
@@ -51,6 +57,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _edittaskNameController.text = etask[0]['name'] ?? 'No Name';
       _edittaskDescriptionController.text =
           etask[0]['description'] ?? 'No Description';
+      _edittaskPriorityController.text = etask[0]['priority'].toString();
+      _edittasDurationController.text = etask[0]['duration'].toString();
     });
     _showEditDialog(context);
   }
@@ -71,11 +79,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () async {
                     _task.name = _taskNameController.text;
                     _task.description = _taskDescriptionController.text;
+                    _task.priority = int.parse(_taskPriorityController.text);
+                    _task.duration = int.parse(_taskDurationController.text);
+
                     var result = _taskService.saveTask(_task);
 
                     print(await result);
                     Navigator.pop(context);
                     getAllTasks();
+
                     _showSuccessSnackBar(Text('Added Successfully'));
                   },
                   child: Text('Save')),
@@ -94,6 +106,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration: InputDecoration(
                         hintText: 'Write a Description',
                         labelText: 'Description'),
+                  ),
+                  TextField(
+                    controller: _taskPriorityController,
+                    decoration: InputDecoration(
+                        hintText: 'Give a Priority', labelText: 'Priority'),
+                  ),
+                  TextField(
+                    controller: _taskDurationController,
+                    decoration: InputDecoration(
+                        hintText: 'Give a Duration', labelText: 'Duration'),
                   )
                 ],
               ),
@@ -123,9 +145,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     _task.id = etask[0]['id'];
                     _task.name = _edittaskNameController.text;
                     _task.description = _edittaskDescriptionController.text;
+                    _task.priority =
+                        int.parse(_edittaskPriorityController.text);
+                    _task.duration = int.parse(_edittasDurationController.text);
+
                     var result = _taskService.updateTask(_task);
 
-                    print(await result);
+                    //print(await result);
                     Navigator.pop(context);
                     getAllTasks();
                     _showSuccessSnackBar(Text('Updated Successfully'));
@@ -157,7 +183,23 @@ class _HomeScreenState extends State<HomeScreen> {
                         hintText: 'Write a Description',
                         labelText: 'Description',
                         labelStyle: TextStyle(color: Colors.grey[400])),
-                  )
+                  ),
+                  TextField(
+                    controller: _edittaskPriorityController,
+                    style: TextStyle(color: Colors.grey[400]),
+                    decoration: InputDecoration(
+                        hintText: 'Write a Priority',
+                        labelText: 'Priority',
+                        labelStyle: TextStyle(color: Colors.grey[400])),
+                  ),
+                  TextField(
+                    controller: _edittasDurationController,
+                    style: TextStyle(color: Colors.grey[400]),
+                    decoration: InputDecoration(
+                        hintText: 'Write a Duration',
+                        labelText: 'Duration(in mins)',
+                        labelStyle: TextStyle(color: Colors.grey[400])),
+                  ),
                 ],
               ),
             ),
@@ -184,9 +226,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.red,
                   onPressed: () async {
                     var result = _taskService.deleteTask(taskId);
-                    print(await result);
+                    // print(await result);
                     Navigator.pop(context);
-                    getAllTasks();
+                    setState(() {
+                      getAllTasks();
+                    });
                     _showSuccessSnackBar(Text('Deleted Successfully'));
                   },
                   child: Text(
@@ -202,7 +246,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   _showSuccessSnackBar(message) {
     var _snackBar = SnackBar(content: message);
-    // ignore: deprecated_member_use
     _globalKey.currentState!.showSnackBar(_snackBar);
   }
 

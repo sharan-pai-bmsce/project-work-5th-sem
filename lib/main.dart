@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'package:flutter/material.dart';
 import 'timetable.dart';
 import 'taskframe.dart';
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyNavigationBar extends StatefulWidget {
-  MyNavigationBar({Key? key}) : super(key: key);
+  MyNavigationBar({Key key}) : super(key: key);
 
   @override
   _MyNavigationBarState createState() => _MyNavigationBarState();

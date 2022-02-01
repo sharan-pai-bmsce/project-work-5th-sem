@@ -149,7 +149,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: <Widget>[
                       Text("Time Remaining: ",
                           style: TextStyle(fontSize: 20, color: Colors.white)),
-                      Text(limit > 0 ? convert(limit) : " 00:00",
+                      Text(
+                          //limit > 0 ? convert(limit) : " 00:00",
+                          limit.toString() + " mins",
                           style: TextStyle(fontSize: 20, color: Colors.white)),
                     ],
                   )),

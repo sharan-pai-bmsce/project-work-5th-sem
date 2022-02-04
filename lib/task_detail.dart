@@ -10,7 +10,7 @@ import 'task_body.dart';
 import 'utility.dart';
 
 class TaskDetail extends StatefulWidget {
-  Task tasks;
+  TaskTimeTable tasks;
   TaskDetail({Key? key, required this.tasks}) : super(key: key);
 
   @override

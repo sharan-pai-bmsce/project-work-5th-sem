@@ -15,7 +15,7 @@ class Timetable extends StatelessWidget {
   RouteFactory _route() {
     return (settings) {
       Widget screen;
-      Task arguments = settings.arguments as Task;
+      TaskTimeTable arguments = settings.arguments as TaskTimeTable;
       // print(arguments);
       // print(arguments.toString());
       switch (settings.name) {
@@ -46,7 +46,7 @@ class AppointmentWithoutWeekends extends StatefulWidget {
 }
 
 class CalendarAppointment extends State<AppointmentWithoutWeekends> {
-  final CalendarDataSource _dataSource = _DataSource(<Task>[]);
+  final CalendarDataSource _dataSource = _DataSource(<TaskTimeTable>[]);
   final List<String> _subjectCollection = <String>[];
   final List<DateTime> _startTimeCollection = <DateTime>[];
   final List<DateTime> _endTimeCollection = <DateTime>[];
@@ -144,7 +144,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
                         : false
                     : false;
                 if (state) {
-                  Task app = ct.appointments![0];
+                  TaskTimeTable app = ct.appointments![0];
                   Navigator.pushNamed(
                     context,
                     TaskDetailRoute,
@@ -197,7 +197,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
   void viewChanged(ViewChangedDetails viewChangedDetails) async {
     List<DateTime> visibleDates = viewChangedDetails.visibleDates;
     List<TimeRegion> _timeRegion = <TimeRegion>[];
-    List<Task> appointments = <Task>[];
+    List<TaskTimeTable> appointments = <TaskTimeTable>[];
     bool stat = false;
     x = viewChangedDetails;
     // This will refresh the window each time the window is loaded. For example when you switch from from 1 date to another previous appointment details will be present and new details will be loaded. This will scrub the previous data and
@@ -214,7 +214,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
               _dataSource.appointments!.clear();
               List<dynamic> contentJson = jsonDecode(contents as String);
               for (var element in contentJson) {
-                _dataSource.appointments!.add(Task(
+                _dataSource.appointments!.add(TaskTimeTable(
                   priority: element["priority"],
                   subject: element["name"],
                   startTime: DateTime.parse(element["startTime"]),
@@ -301,7 +301,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
 }
 
 class _DataSource extends CalendarDataSource {
-  _DataSource(List<Task> source) {
+  _DataSource(List<TaskTimeTable> source) {
     appointments = source;
   }
 }

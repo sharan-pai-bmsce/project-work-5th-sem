@@ -14,5 +14,7 @@ class DatabaseConnection {
   _onCreatingDatabase(Database database, int version) async {
     await database.execute(
         "CREATE TABLE tasks(id INTEGER PRIMARY KEY , name TEXT , description TEXT, priority INTEGER , duration INTEGER)");
+    await database.execute(
+        "CREATE TABLE timeInput(id INTEGER PRIMARY KEY , date TEXT, startTime INTEGER,endTime INTEGER)");
   }
 }

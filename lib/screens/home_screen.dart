@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fix_my_life/moduls/task.dart';
 import 'package:fix_my_life/service/task_service.dart';
+import '../utility.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -22,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Task> _taskList = [];
 
   var etask;
-
+  int limit = 0;
   var _edittaskNameController = TextEditingController();
   var _edittaskDescriptionController = TextEditingController();
   var _edittaskPriorityController = TextEditingController();
@@ -31,6 +35,20 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     getAllTasks();
+    Utility.localFile1.then((file) {
+      file.exists().then((stat) {
+        if (stat) {
+          file.readAsString().then((contents) {
+            Map<String, dynamic> content = jsonDecode(contents);
+            limit = content["limit"];
+            // tasks = content["Tasks"];
+            print(content);
+            print(limit);
+            // setState(() {});
+          });
+        }
+      });
+    });
   }
 
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
@@ -53,17 +71,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   _editTask(BuildContext context, taskID) async {
     etask = await _taskService.readCategoryById(taskID);
+    limit -= await etask[0]['duration'] as int;
     setState(() {
       _edittaskNameController.text = etask[0]['name'] ?? 'No Name';
       _edittaskDescriptionController.text =
           etask[0]['description'] ?? 'No Description';
       _edittaskPriorityController.text = etask[0]['priority'].toString();
       _edittasDurationController.text = etask[0]['duration'].toString();
+      print("Before Edit: " + limit.toString());
     });
     _showEditDialog(context);
   }
 
-  _showFormDialog(BuildContext context) {
+  /*_showFormDialog(BuildContext context) {
     return showDialog(
         context: context,
         barrierDismissible: true,
@@ -122,6 +142,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         });
+  }*/
+
+  limitUpdate() {
+    Utility.localFile1.then((file) {
+      print(limit);
+      file.writeAsString(jsonEncode({"limit": limit}),
+          mode: FileMode.writeOnly);
+    });
   }
 
   _showEditDialog(BuildContext context) {
@@ -148,12 +176,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     _task.priority =
                         int.parse(_edittaskPriorityController.text);
                     _task.duration = int.parse(_edittasDurationController.text);
-
                     var result = _taskService.updateTask(_task);
-
+                    limit += _task.duration;
                     //print(await result);
+                    print("After Edit: " + limit.toString());
                     Navigator.pop(context);
                     getAllTasks();
+                    limitUpdate();
                     _showSuccessSnackBar(Text('Updated Successfully'));
                   },
                   child: Text(
@@ -225,11 +254,15 @@ class _HomeScreenState extends State<HomeScreen> {
               FlatButton(
                   color: Colors.red,
                   onPressed: () async {
+                    etask = await _taskService.readCategoryById(taskId);
                     var result = _taskService.deleteTask(taskId);
+                    limit -= await etask[0]['duration'] as int;
                     // print(await result);
+                    print("After Delete: " + limit.toString());
                     Navigator.pop(context);
                     setState(() {
                       getAllTasks();
+                      limitUpdate();
                     });
                     _showSuccessSnackBar(Text('Deleted Successfully'));
                   },
@@ -304,16 +337,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           }),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.grey[850],
-        onPressed: () {
-          _showFormDialog(context);
-        },
-        child: Icon(
-          Icons.add,
-          color: Colors.grey[400],
-        ),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   backgroundColor: Colors.grey[850],
+      //   onPressed: () {
+      //     _showFormDialog(context);
+      //   },
+      //   child: Icon(
+      //     Icons.add,
+      //     color: Colors.grey[400],
+      //   ),
+      // ),
     );
   }
 }

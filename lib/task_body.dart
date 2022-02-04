@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-class Task extends Appointment {
+class TaskTimeTable extends Appointment {
   int priority = 0;
   bool isComplete = false;
 
-  Task(
+  TaskTimeTable(
       {required String subject,
       required DateTime startTime,
       required DateTime endTime,

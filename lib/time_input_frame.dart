@@ -4,6 +4,8 @@ import 'dart:ui';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'moduls/timeInput.dart';
+import 'service/time_service.dart';
 import 'utility.dart';
 
 class DateTimePicker extends StatefulWidget {
@@ -33,9 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
   String message = "";
   DateTime ts = DateTime.now();
   DateTime td = DateTime.now();
-  List<dynamic> time = [];
+  TimeInput timeInput = TimeInput();
+  // List<dynamic> time = [];
   List<dynamic> ttData = [];
-  Map<String, dynamic> fileContents = {};
   DateTime now = DateTime.now();
   int limit = 0;
   final List<Color> _colorCollection = <Color>[];
@@ -89,17 +91,16 @@ class _HomeScreenState extends State<HomeScreen> {
     Utility.localFile1.then((file) {
       return file.readAsString();
     }).then((contents) {
-      fileContents = jsonDecode(contents);
-      limit = fileContents["limit"];
+      limit = jsonDecode(contents)["limit"];
       setState(() {});
     });
-    Utility.localFile3.then((file) {
-      return file.readAsString();
-    }).then((contents) {
-      time = jsonDecode(contents);
-      print(time);
-      setState(() {});
-    });
+    // Utility.localFile3.then((file) {
+    //   return file.readAsString();
+    // }).then((contents) {
+    //   time = jsonDecode(contents);
+    //   print(time);
+    //   setState(() {});
+    // });
   }
 
   void _getColorCollection() {
@@ -465,143 +466,145 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(fontSize: 20),
                     ),
                     onPressed: () {
-                      // if (limit > 0) {
-                      //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      //       backgroundColor: Colors.redAccent[50],
-                      //       content: Text(
-                      //         'Cannot continue. You must add time equivalent to limit.',
-                      //         style: TextStyle(color: Colors.redAccent),
-                      //       )));
-                      //   setState(() {});
-                      //   return;
-                      // }
-                      time.sort((a, b) {
-                        if (DateTime.parse(a["date"] + " " + a["startTime"])
-                            .isBefore(DateTime.parse(
-                                b["date"] + " " + a["endTime"]))) {
-                          return -1;
-                        }
-                        return 1;
-                      });
-                      print(time);
-                      List<dynamic> tasks = fileContents["Tasks"];
-                      Random random = new Random();
-                      int trace = 0;
-                      int timeLeft = 0;
-                      tasks.sort((a, b) {
-                        if (a["priority"] < b["priority"]) {
-                          return 1;
-                        } else if (a["priority"] == b["priority"]) {
-                          if (a["time"] > b["time"]) {
-                            return 1;
-                          } else {
-                            return 0;
-                          }
-                        }
-                        return 0;
-                      });
-                      for (int j = 0; j < time.length; j++) {
-                        DateTime start = DateTime.parse(time[j]["date"] +
-                            " " +
-                            time[j]["startTime"] +
-                            ":00");
-                        int duration = time[j]["duration"];
-                        print(duration);
-                        // for (var element in tasks) {
-                        //   if (element["time"] <= duration) {
-                        //     ttData.add({
-                        //       "name": element["name"],
-                        //       "startTime": start.toString(),
-                        //       "endTime": start
-                        //           .add(Duration(minutes: element["time"]))
-                        //           .toString(),
-                        //       "priority": element["priority"],
-                        //       "notes": element["notes"],
-                        //       // "color": _colorCollection[random.nextInt(9)].value,
-                        //       "complete": false,
-                        //     });
-                        //     start =
-                        //         start.add(Duration(minutes: element["time"]));
-                        //     tasks.remove(element);
-                        //   } else {
-                        //     ttData.add({
-                        //       "name": element["name"],
-                        //       "startTime": start.toString(),
-                        //       "endTime": start
-                        //           .add(Duration(minutes: duration))
-                        //           .toString(),
-                        //       "priority": element["priority"],
-                        //       "notes": element["notes"],
-                        //       // "color": _colorCollection[random.nextInt(9)].value,
-                        //       "complete": false,
-                        //     });
-                        //     element["time"] -= duration;
-                        //     break;
-                        //   }
-                        // }
-
-                        for (int i = trace; i < tasks.length; i++) {
-                          if (tasks[i]["time"] - timeLeft <= duration) {
-                            ttData.add({
-                              "name": tasks[i]["name"],
-                              "startTime": start.toString(),
-                              "endTime": start
-                                  .add(Duration(
-                                      minutes: tasks[i]["time"] - timeLeft))
-                                  .toString(),
-                              "priority": tasks[i]["priority"],
-                              "notes": tasks[i]["notes"],
-                              "color":
-                                  _colorCollection[random.nextInt(9)].value,
-                              "complete": false,
-                            });
-                            start = start.add(
-                                Duration(minutes: tasks[i]["time"] - timeLeft));
-                            duration =
-                                (duration + timeLeft - tasks[i]["time"]) as int;
-                            trace = i + 1;
-                            timeLeft = 0;
-                            // tasks.remove(tasks[i]);
-                          } else {
-                            ttData.add({
-                              "name": tasks[i]["name"],
-                              "startTime": start.toString(),
-                              "endTime": start
-                                  .add(Duration(minutes: duration))
-                                  .toString(),
-                              "priority": tasks[i]["priority"],
-                              "notes": tasks[i]["notes"],
-                              "color":
-                                  _colorCollection[random.nextInt(9)].value,
-                              "complete": false,
-                            });
-                            timeLeft = duration;
-                            // tasks[i]["time"] -= duration;
-                            break;
-                          }
-                        }
+                      if (limit > 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            backgroundColor: Colors.redAccent[50],
+                            content: Text(
+                              'Cannot continue. You must add time equivalent to limit.',
+                              style: TextStyle(color: Colors.redAccent),
+                            )));
+                        setState(() {});
+                        return;
                       }
 
-                      Utility.localFile2.then((file) {
-                        file.writeAsString(jsonEncode(ttData),
-                            mode: FileMode.writeOnly);
-
-                        // file.readAsString().then((content) => print(content));
-                      });
-                      print(tasks);
+                      // time.sort((a, b) {
+                      //   if (DateTime.parse(a["date"] + " " + a["startTime"])
+                      //       .isBefore(DateTime.parse(
+                      //           b["date"] + " " + a["endTime"]))) {
+                      //     return -1;
+                      //   }
+                      //   return 1;
+                      // });
                       // print(time);
+                      // List<dynamic> tasks = fileContents["Tasks"];
+                      // Random random = new Random();
+                      // int trace = 0;
+                      // int timeLeft = 0;
+                      // tasks.sort((a, b) {
+                      //   if (a["priority"] < b["priority"]) {
+                      //     return 1;
+                      //   } else if (a["priority"] == b["priority"]) {
+                      //     if (a["time"] > b["time"]) {
+                      //       return 1;
+                      //     } else {
+                      //       return 0;
+                      //     }
+                      //   }
+                      //   return 0;
+                      // });
+                      // Dont delete the below.
+                      // for (int j = 0; j < time.length; j++) {
+                      //   DateTime start = DateTime.parse(time[j]["date"] +
+                      //       " " +
+                      //       time[j]["startTime"] +
+                      //       ":00");
+                      //   int duration = time[j]["duration"];
+                      //   print(duration);
+                      //   // for (var element in tasks) {
+                      //   //   if (element["time"] <= duration) {
+                      //   //     ttData.add({
+                      //   //       "name": element["name"],
+                      //   //       "startTime": start.toString(),
+                      //   //       "endTime": start
+                      //   //           .add(Duration(minutes: element["time"]))
+                      //   //           .toString(),
+                      //   //       "priority": element["priority"],
+                      //   //       "notes": element["notes"],
+                      //   //       // "color": _colorCollection[random.nextInt(9)].value,
+                      //   //       "complete": false,
+                      //   //     });
+                      //   //     start =
+                      //   //         start.add(Duration(minutes: element["time"]));
+                      //   //     tasks.remove(element);
+                      //   //   } else {
+                      //   //     ttData.add({
+                      //   //       "name": element["name"],
+                      //   //       "startTime": start.toString(),
+                      //   //       "endTime": start
+                      //   //           .add(Duration(minutes: duration))
+                      //   //           .toString(),
+                      //   //       "priority": element["priority"],
+                      //   //       "notes": element["notes"],
+                      //   //       // "color": _colorCollection[random.nextInt(9)].value,
+                      //   //       "complete": false,
+                      //   //     });
+                      //   //     element["time"] -= duration;
+                      //   //     break;
+                      //   //   }
+                      //   // }
+
+                      //   for (int i = trace; i < tasks.length; i++) {
+                      //     if (tasks[i]["time"] - timeLeft <= duration) {
+                      //       ttData.add({
+                      //         "name": tasks[i]["name"],
+                      //         "startTime": start.toString(),
+                      //         "endTime": start
+                      //             .add(Duration(
+                      //                 minutes: tasks[i]["time"] - timeLeft))
+                      //             .toString(),
+                      //         "priority": tasks[i]["priority"],
+                      //         "notes": tasks[i]["notes"],
+                      //         "color":
+                      //             _colorCollection[random.nextInt(9)].value,
+                      //         "complete": false,
+                      //       });
+                      //       start = start.add(
+                      //           Duration(minutes: tasks[i]["time"] - timeLeft));
+                      //       duration =
+                      //           (duration + timeLeft - tasks[i]["time"]) as int;
+                      //       trace = i + 1;
+                      //       timeLeft = 0;
+                      //       // tasks.remove(tasks[i]);
+                      //     } else {
+                      //       ttData.add({
+                      //         "name": tasks[i]["name"],
+                      //         "startTime": start.toString(),
+                      //         "endTime": start
+                      //             .add(Duration(minutes: duration))
+                      //             .toString(),
+                      //         "priority": tasks[i]["priority"],
+                      //         "notes": tasks[i]["notes"],
+                      //         "color":
+                      //             _colorCollection[random.nextInt(9)].value,
+                      //         "complete": false,
+                      //       });
+                      //       timeLeft = duration;
+                      //       // tasks[i]["time"] -= duration;
+                      //       break;
+                      //     }
+                      //   }
+                      // }
+
+                      // Utility.localFile2.then((file) {
+                      //   file.writeAsString(jsonEncode(ttData),
+                      //       mode: FileMode.writeOnly);
+
+                      //   // file.readAsString().then((content) => print(content));
+                      // });
                       // print(tasks);
-                      Utility.localFile1.then((file) {
-                        file.writeAsString(
-                            jsonEncode({
-                              "limit": limit,
-                              "Tasks": fileContents["Tasks"],
-                            }),
-                            mode: FileMode.writeOnly);
-                      });
-                      Utility.localFile3.then((file) {
-                        file.writeAsString(jsonEncode(time));
-                      });
+                      // // print(time);
+                      // // print(tasks);
+                      // Utility.localFile1.then((file) {
+                      //   file.writeAsString(
+                      //       jsonEncode({
+                      //         "limit": limit,
+                      //         "Tasks": fileContents["Tasks"],
+                      //       }),
+                      //       mode: FileMode.writeOnly);
+                      // });
+                      // Utility.localFile3.then((file) {
+                      //   file.writeAsString(jsonEncode(time));
+                      // });
                     },
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0)),

@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:duration_picker/duration_picker.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:fix_my_life/moduls/task.dart';
+import 'package:fix_my_life/service/task_service.dart';
 import 'utility.dart';
+import './screens/home_screen.dart';
 
 class TaskFrame extends StatefulWidget {
   const TaskFrame({Key? key}) : super(key: key);
@@ -20,7 +23,10 @@ class _TaskFrameState extends State<TaskFrame> {
   int limit = 0;
   String name = "";
   String note = "";
-  List<dynamic> tasks = [];
+  Task task = Task();
+  String todolist = "/HomeScreen";
+  // List<Task> _taskList = [];
+  var _taskService = TaskService();
   int pri = 0, time = 0;
   TextEditingController priorityController = new TextEditingController();
   TextEditingController titleController = new TextEditingController();
@@ -46,7 +52,7 @@ class _TaskFrameState extends State<TaskFrame> {
           file.readAsString().then((contents) {
             Map<String, dynamic> content = jsonDecode(contents);
             limit = content["limit"];
-            tasks = content["Tasks"];
+            // tasks = content["Tasks"];
             print(content);
             // setState(() {});
           });
@@ -65,7 +71,14 @@ class _TaskFrameState extends State<TaskFrame> {
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.list_alt),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => HomeScreen(),
+                        maintainState: false));
+                print(limit);
+              },
             )
           ],
           elevation: 0,
@@ -174,91 +187,91 @@ class _TaskFrameState extends State<TaskFrame> {
                 ),
               ),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Container(
-                    margin: EdgeInsets.fromLTRB(30, 0, 10, 10),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.grey[700],
-                      ),
-                      onPressed: () async {
-                        _getColorCollection();
-                        List<dynamic> ttData = [];
-                        if (tasks.length <= 0) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              backgroundColor: Colors.redAccent[50],
-                              content: Text(
-                                'No tasks added to generate timetable',
-                                style: TextStyle(color: Colors.redAccent),
-                              )));
-                          setState(() {});
-                          return;
-                        }
+                // Container(
+                //     margin: EdgeInsets.fromLTRB(30, 0, 10, 10),
+                //     child: ElevatedButton(
+                //       style: ElevatedButton.styleFrom(
+                //         primary: Colors.grey[700],
+                //       ),
+                //       onPressed: () async {
+                //         _getColorCollection();
+                //         List<dynamic> ttData = [];
+                //         if (tasks.length <= 0) {
+                //           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                //               backgroundColor: Colors.redAccent[50],
+                //               content: Text(
+                //                 'No tasks added to generate timetable',
+                //                 style: TextStyle(color: Colors.redAccent),
+                //               )));
+                //           setState(() {});
+                //           return;
+                //         }
 
-                        DateTime dateN = DateTime.now();
-                        String date = dateN.day.toString() +
-                            "-" +
-                            dateN.month.toString() +
-                            "-" +
-                            dateN.year.toString();
+                //         DateTime dateN = DateTime.now();
+                //         String date = dateN.day.toString() +
+                //             "-" +
+                //             dateN.month.toString() +
+                //             "-" +
+                //             dateN.year.toString();
 
-                        Map<String, dynamic> res = {
-                          "limit": limit,
-                          "Tasks": tasks,
-                        };
-                        // tasks.sort((a, b) {
-                        //   if (a["priority"] < b["priority"]) {
-                        //     return 1;
-                        //   } else if (a["priority"] == b["priority"]) {
-                        //     if (a["time"] > b["time"]) {
-                        //       return 1;
-                        //     } else {
-                        //       return 0;
-                        //     }
-                        //   }
-                        //   return 0;
-                        // });
+                //         Map<String, dynamic> res = {
+                //           "limit": limit,
+                //           "Tasks": tasks,
+                //         };
+                //         // tasks.sort((a, b) {
+                //         //   if (a["priority"] < b["priority"]) {
+                //         //     return 1;
+                //         //   } else if (a["priority"] == b["priority"]) {
+                //         //     if (a["time"] > b["time"]) {
+                //         //       return 1;
+                //         //     } else {
+                //         //       return 0;
+                //         //     }
+                //         //   }
+                //         //   return 0;
+                //         // });
 
-                        // DateTime x = DateTime.now();
-                        // DateTime start =
-                        //     DateTime(x.year, x.month, x.day, 12, 30);
-                        // Random random = new Random();
-                        // for (var element in tasks) {
-                        //   ttData.add({
-                        //     "name": element["name"],
-                        //     "startTime": start.toString(),
-                        //     "endTime": start
-                        //         .add(Duration(minutes: element["time"]))
-                        //         .toString(),
-                        //     "priority": element["priority"],
-                        //     "notes": element["notes"],
-                        //     "color": _colorCollection[random.nextInt(9)].value,
-                        //     "complete": false,
-                        //   });
-                        //   start = start.add(Duration(minutes: element["time"]));
-                        // }
-                        // Map<String, dynamic> y = {
-                        //   "Completed": [],
-                        //   "Tasks": ttData,
-                        // };
+                //         // DateTime x = DateTime.now();
+                //         // DateTime start =
+                //         //     DateTime(x.year, x.month, x.day, 12, 30);
+                //         // Random random = new Random();
+                //         // for (var element in tasks) {
+                //         //   ttData.add({
+                //         //     "name": element["name"],
+                //         //     "startTime": start.toString(),
+                //         //     "endTime": start
+                //         //         .add(Duration(minutes: element["time"]))
+                //         //         .toString(),
+                //         //     "priority": element["priority"],
+                //         //     "notes": element["notes"],
+                //         //     "color": _colorCollection[random.nextInt(9)].value,
+                //         //     "complete": false,
+                //         //   });
+                //         //   start = start.add(Duration(minutes: element["time"]));
+                //         // }
+                //         // Map<String, dynamic> y = {
+                //         //   "Completed": [],
+                //         //   "Tasks": ttData,
+                //         // };
 
-                        Utility.localFile1.then((file) {
-                          file.writeAsString(jsonEncode(res),
-                              mode: FileMode.writeOnly);
-                          file.readAsString().then((content) => print(content));
-                        });
+                //         // Utility.localFile1.then((file) {
+                //         //   file.writeAsString(jsonEncode(res),
+                //         //       mode: FileMode.writeOnly);
+                //         //   file.readAsString().then((content) => print(content));
+                //         // });
 
-                        // Utility.localFile2.then((file) {
-                        //   file.writeAsString(jsonEncode(y),
-                        //       mode: FileMode.writeOnly);
+                //         // Utility.localFile2.then((file) {
+                //         //   file.writeAsString(jsonEncode(y),
+                //         //       mode: FileMode.writeOnly);
 
-                        //   file.readAsString().then((content) => print(content));
-                        // });
-                      },
-                      child: const Text(
-                        'Generate Timetable',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    )),
+                //         //   file.readAsString().then((content) => print(content));
+                //         // });
+                //       },
+                //       child: const Text(
+                //         'Generate Timetable',
+                //         style: TextStyle(color: Colors.white),
+                //       ),
+                //     )),
                 Container(
                     margin: EdgeInsets.fromLTRB(10, 0, 30, 10),
                     child: ElevatedButton(
@@ -297,24 +310,38 @@ class _TaskFrameState extends State<TaskFrame> {
                           print(time);
                           limit += time;
                           note = noteController.text;
-                          Map<String, dynamic> x = {
-                            "name": name,
-                            "time": time,
-                            "priority": pri,
-                            "notes": note == "" ? "No note was added" : note,
-                          };
-                          tasks.add(x);
-                          titleController.clear();
-                          priorityController.clear();
-                          noteController.clear();
-                          _time = 'Approx time to complete';
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              backgroundColor: Colors.greenAccent[50],
-                              content: Text(
-                                'Task added Successfully',
-                                style: TextStyle(color: Colors.greenAccent),
-                              )));
-                          setState(() {});
+
+                          // Map<String, dynamic> x = {
+                          //   "name": name,
+                          //   "time": time,
+                          //   "priority": pri,
+                          //   "notes": note == "" ? "No note was added" : note,
+                          // };
+                          task.name = name;
+                          task.priority = pri;
+                          task.duration = time;
+                          task.description =
+                              note == "" ? "No note was added" : note;
+                          setState(() {
+                            _taskService.saveTask(task).then((content) {
+                              print(content);
+                            });
+                            titleController.clear();
+                            priorityController.clear();
+                            noteController.clear();
+                            _time = 'Approx time to complete';
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                backgroundColor: Colors.greenAccent[50],
+                                content: Text(
+                                  'Task added Successfully',
+                                  style: TextStyle(color: Colors.greenAccent),
+                                )));
+                          });
+                          Utility.localFile1.then((file) {
+                            print(limit);
+                            file.writeAsString(jsonEncode({"limit": limit}),
+                                mode: FileMode.writeOnly);
+                          });
                         },
                         child: Text("Add Task",
                             style: TextStyle(color: Colors.white)),

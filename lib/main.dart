@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
 import 'timetable.dart';
 import 'taskframe.dart';
 import 'utility.dart';
@@ -13,6 +14,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyNavigationBar(),
+      // initialRoute: '/',
+      routes: {
+        todoList: (context) => TodoList(),
+      },
     );
   }
 }
@@ -34,13 +39,13 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
 
   void _onItemTapped(int index) {
     setState(() {
-      // Utility.localFile1.then((file) {
+      // Utility.localFileTime.then((file) {
       //   file.delete();
       // });
-      // Utility.localFile2.then((file) {
+      // Utility.localFileTimeTable.then((file) {
       //   file.delete();
       // });
-      // Utility.localFile3.then((file) {
+      // Utility.localFileTask.then((file) {
       //   file.delete();
       // });
       _selectedIndex = index;

@@ -52,49 +52,16 @@ class _TaskDetailState extends State<TaskDetail> {
                 IconButton(
                   icon: Icon(Icons.done),
                   onPressed: () {
-                    Utility.localFile2.then((file) {
-                      file.exists().then((status) {
-                        if (status) {
-                          file.readAsString().then((content) {
-                            List<dynamic> tasks = jsonDecode(content);
-                            tasks.removeWhere((element) =>
-                                element["startTime"] ==
-                                widget.tasks.startTime.toString());
-                            file.writeAsString(jsonEncode(tasks),
-                                mode: FileMode.writeOnly);
-                            Navigator.pop(context, true);
-                          });
-                        }
-                      });
-
-                      Utility.localFile1.then((file) {
-                        file.exists().then((status) {
-                          if (status) {
-                            file.readAsString().then((content) {
-                              Map<String, dynamic> object = jsonDecode(content);
-                              List<dynamic> tasks = object["Tasks"];
-                              for (int i = 0; i < tasks.length; i++) {
-                                if (tasks[i]["name"] == widget.tasks.subject) {
-                                  tasks[i]["time"] += widget.tasks.startTime
-                                      .difference(widget.tasks.endTime)
-                                      .inMinutes;
-                                  if (tasks[i]["time"] <= 0) {
-                                    tasks.remove(tasks[i]);
-                                  }
-                                  object["limit"] +=
-                                      diff(widget.tasks.startTime)
-                                          .difference(widget.tasks.endTime)
-                                          .inMinutes;
-                                  break;
-                                }
-                              }
-                              file.writeAsString(jsonEncode(object),
-                                  mode: FileMode.writeOnly);
-                            });
-                          }
-                        });
-                      });
+                    Map<String, dynamic> tasks = {
+                      "name": widget.tasks.subject,
+                      "startTime": widget.tasks.startTime.toString(),
+                      "endTime": widget.tasks.endTime.toString(),
+                    };
+                    setState(() {
+                      Utility.deleteTask(tasks, "");
+                      Utility.deleteTimeTable(tasks);
                     });
+                    Navigator.pop(context);
                   },
                 )
               ]

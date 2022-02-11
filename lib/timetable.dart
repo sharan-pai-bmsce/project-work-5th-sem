@@ -57,56 +57,9 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
   void initState() {
     _getColorCollection();
     super.initState();
-    Utility.localFile3.then((file) {
-      file.exists().then((stat) {
-        if (stat) {
-          file.readAsString().then((timeInput) {
-            List<dynamic> content = jsonDecode(timeInput);
-            DateTime curr = DateTime.now();
-            for (int i = 0; i < content.length; i++) {
-              DateTime time = DateTime.parse(
-                  content[i]["date"] + " " + content[i]["endTime"] + ":00");
-              if (time.isBefore(curr)) {
-                content.remove(content[i]);
-              }
-            }
-            file.writeAsString(jsonEncode(content));
-            setState(() {});
-          });
-        }
-      });
-    });
-
-    Utility.localFile1.then((file1) {
-      Utility.localFile2.then((file2) {
-        file1.readAsString().then((taskInput) {
-          Map<String, dynamic> fil1Data = jsonDecode(taskInput);
-          List<dynamic> tasks = fil1Data["Tasks"];
-          print(tasks);
-          file2.readAsString().then((ttInput) {
-            List<dynamic> ttData = jsonDecode(ttInput);
-            for (int i = 0; i < ttData.length; i++) {
-              DateTime startTime = DateTime.parse(ttData[i]["startTime"]);
-              DateTime endTime = DateTime.parse(ttData[i]["endTime"]);
-              if (endTime.isBefore(DateTime.now())) {
-                for (int j = 0; j < tasks.length; j++) {
-                  if (tasks[j]["name"] == ttData[i]["name"]) {
-                    tasks[j]["time"] += startTime.difference(endTime).inMinutes;
-                    if (tasks[j]["time"] <= 0) {
-                      tasks.remove(tasks[j]);
-                    }
-                    break;
-                  }
-                }
-                ttData.remove(ttData[i]);
-              }
-            }
-            setState(() {});
-            file1.writeAsString(jsonEncode(fil1Data));
-            file2.writeAsString(jsonEncode(ttData));
-          });
-        });
-      });
+    setState(() {
+      Utility.eliminatepreviousTime();
+      Utility.eliminatepreviousTask();
     });
   }
 
@@ -204,45 +157,24 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
     _dataSource.appointments!.clear();
     // DateTime x = DateTime.now();
     // DateTime start = DateTime(x.year, x.month, x.day, 12, 30);
-    Utility.localFile2.then((file) {
-      return file.exists().then((stat) {
-        if (stat) {
-          appointments.clear();
-          _dataSource.appointments!.clear();
-          file.readAsString().then((contents) {
-            if (contents != "") {
-              _dataSource.appointments!.clear();
-              List<dynamic> contentJson = jsonDecode(contents as String);
-              for (var element in contentJson) {
-                _dataSource.appointments!.add(Task(
-                  priority: element["priority"],
-                  subject: element["name"],
-                  startTime: DateTime.parse(element["startTime"]),
-                  endTime: DateTime.parse(element["endTime"]),
-                  isComplete: element["complete"],
-                  color: Color(element["color"]),
-                  notes: element["notes"],
-                ));
-              }
-              print(contents);
-              // for (var element in contentJson["Completed"]) {
-              //   // print(element);
-              //   _dataSource.appointments!.add(Task(
-              //     priority: element["priority"],
-              //     subject: element["name"],
-              //     startTime: DateTime.parse(element["startTime"]),
-              //     endTime: DateTime.parse(element["endTime"]),
-              //     isComplete: element["complete"],
-              //     color: Color(element["color"]),
-              //     notes: element["notes"],
-              //   ));
-              // }
-              _dataSource.notifyListeners(
-                  CalendarDataSourceAction.reset, _dataSource.appointments!);
-            }
-          });
-        }
-      });
+    Utility.readFromTimeTable().then((contents) {
+      if (contents == null) return;
+      appointments.clear();
+      _dataSource.appointments!.clear();
+      for (var element in contents) {
+        _dataSource.appointments!.add(Task(
+          priority: element["priority"],
+          subject: element["name"],
+          startTime: DateTime.parse(element["startTime"]),
+          endTime: DateTime.parse(element["endTime"]),
+          isComplete: element["complete"],
+          color: Color(element["color"]),
+          notes: element["notes"],
+        ));
+      }
+      print(contents);
+      _dataSource.notifyListeners(
+          CalendarDataSourceAction.reset, _dataSource.appointments!);
     });
     // appointments.clear();
     // file.exists().then((value) {

@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime td = DateTime.now();
   List<dynamic> time = [];
   List<dynamic> ttData = [];
+  List<dynamic> tasks = [];
   Map<String, dynamic> fileContents = {};
   DateTime now = DateTime.now();
   int limit = 0;
@@ -86,18 +87,16 @@ class _HomeScreenState extends State<HomeScreen> {
     //   // ttData = fileContents["Tasks"];
     //   setState(() {});
     // });
-    Utility.localFile1.then((file) {
-      return file.readAsString();
-    }).then((contents) {
-      fileContents = jsonDecode(contents);
-      limit = fileContents["limit"];
+    Utility.readFromTask().then((contents) {
+      if (contents != null) {
+        limit = contents["limit"];
+        tasks = contents["Tasks"];
+      }
       setState(() {});
     });
-    Utility.localFile3.then((file) {
-      return file.readAsString();
-    }).then((contents) {
-      time = jsonDecode(contents);
-      print(time);
+    Utility.readFromTime().then((contents) {
+      if (contents != null) time = contents;
+      print(contents);
       setState(() {});
     });
   }
@@ -183,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onConfirm: (date) {
                     print('confirm $date');
                     _date =
-                        '${date.year}-${date.month < 10 ? "0" : ""}${date.month}-${date.day}';
+                        '${date.year}-${date.month < 10 ? "0" : ""}${date.month}-${date.day < 10 ? "0" : ""}${date.day}';
                     setState(() {});
                   }, currentTime: DateTime.now(), locale: LocaleType.en);
                 },
@@ -482,7 +481,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         return 1;
                       });
                       print(time);
-                      List<dynamic> tasks = fileContents["Tasks"];
+                      // List<dynamic> tasks = fileContents["Tasks"];
                       Random random = new Random();
                       int trace = 0;
                       int timeLeft = 0;
@@ -580,26 +579,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
                       }
 
-                      Utility.localFile2.then((file) {
-                        file.writeAsString(jsonEncode(ttData),
-                            mode: FileMode.writeOnly);
-
-                        // file.readAsString().then((content) => print(content));
-                      });
+                      Utility.writeIntoTimeTable(ttData);
                       print(tasks);
                       // print(time);
                       // print(tasks);
-                      Utility.localFile1.then((file) {
-                        file.writeAsString(
-                            jsonEncode({
-                              "limit": limit,
-                              "Tasks": fileContents["Tasks"],
-                            }),
-                            mode: FileMode.writeOnly);
+                      Utility.writeIntoTask({
+                        "limit": limit,
+                        "Tasks": tasks,
                       });
-                      Utility.localFile3.then((file) {
-                        file.writeAsString(jsonEncode(time));
-                      });
+                      Utility.writeIntoTime(time);
                     },
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0)),

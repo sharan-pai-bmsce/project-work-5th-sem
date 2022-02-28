@@ -58,8 +58,8 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
     _getColorCollection();
     super.initState();
     setState(() {
-      Utility.eliminatepreviousTime();
-      Utility.eliminatepreviousTask();
+      Utility.eliminatepreviousTime()
+          .then((value) => Utility.eliminatepreviousTask());
     });
   }
 
@@ -106,9 +106,9 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
                   ).then((value) {
                     if (value == true && x != null) {
                       viewChanged(x!);
+                      setState(() {});
                     }
                   });
-                  setState(() {});
                 }
               },
 

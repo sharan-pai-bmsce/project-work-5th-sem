@@ -66,7 +66,7 @@ class _TodoListState extends State<TodoList> {
       _edittaskPriorityController.text = etask['priority'].toString();
       _edittasDurationController.text = etask['time'].toString();
     });
-    _showEditDialog(context);
+    _showEditDialog(context, etask);
   }
 
   _showFormDialog(BuildContext context) {
@@ -130,7 +130,7 @@ class _TodoListState extends State<TodoList> {
         });
   }
 
-  _showEditDialog(BuildContext context) {
+  _showEditDialog(BuildContext context, task) {
     return showDialog(
         context: context,
         barrierDismissible: true,
@@ -148,18 +148,42 @@ class _TodoListState extends State<TodoList> {
               FlatButton(
                   color: Colors.blue,
                   onPressed: () async {
-                    // _task.id = etask[0]['id'];
-                    // _task.name = _edittaskNameController.text;
-                    // _task.description = _edittaskDescriptionController.text;
-                    // _task.priority =
-                    //     int.parse(_edittaskPriorityController.text);
-                    // _task.duration = int.parse(_edittasDurationController.text);
-
-                    // var result = _taskService.updateTask(_task);
-
-                    //print(await result);
+                    task["name"] = _edittaskNameController.text;
+                    task["notes"] = _edittaskDescriptionController.text;
+                    task['priority'] =
+                        int.parse(_edittaskPriorityController.text);
+                    task['time'] = int.parse(_edittasDurationController.text);
+                    dynamic etask =
+                        await Utility.findByNameTimeTable(task["name"]);
+                    print(await etask);
+                    if (await etask == null) {
+                      Utility.editTask(task).then((content) {
+                        tasks = content["Tasks"];
+                        limit = content["limit"];
+                        setState(() {});
+                      });
+                    } else {
+                      Utility.editTask(task).then((content) {
+                        tasks = content["Tasks"];
+                        limit = content["limit"];
+                        if (limit <= 0) {
+                          Utility.readFromTime().then((time) {
+                            time = time as List<dynamic>;
+                            Utility.generateTimetable(time, tasks, limit);
+                          });
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              backgroundColor: Colors.redAccent[50],
+                              content: Text(
+                                'Cannot accommodate task. Add time and then generate timetable.',
+                                style: TextStyle(color: Colors.redAccent),
+                              )));
+                          setState(() {});
+                        }
+                        setState(() {});
+                      });
+                    }
                     Navigator.pop(context);
-                    // getAllTasks();
                     _showSuccessSnackBar(context, Text('Updated Successfully'));
                   },
                   child: Text(
@@ -240,7 +264,11 @@ class _TodoListState extends State<TodoList> {
                         setState(() {});
                       });
                     } else {
-                      Utility.deleteTask(dtask, "");
+                      Utility.deleteTask(dtask, "").then((content) {
+                        tasks = content["Tasks"];
+                        limit = content["limit"];
+                        setState(() {});
+                      });
                       Utility.deleteTimeTable(dtask);
                     }
                     Navigator.pop(context);

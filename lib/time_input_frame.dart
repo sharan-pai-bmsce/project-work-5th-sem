@@ -2,31 +2,34 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 import 'dart:convert';
+import 'package:fix_my_life/taskframe.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'utility.dart';
 
+const timeList = "/timeList";
+
+// class DateTimePicker extends StatefulWidget {
+//   @override
+//   _DateTimePickerState createState() => _DateTimePickerState();
+// }
+
+// class _DateTimePickerState extends State<DateTimePicker> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return (
+//       debugShowCheckedModeBanner: false,
+//       home: HomeScreen(),
+//     );
+//   }
+// }
+
 class DateTimePicker extends StatefulWidget {
   @override
-  _DateTimePickerState createState() => _DateTimePickerState();
+  _DateTimePicker createState() => _DateTimePicker();
 }
 
-class _DateTimePickerState extends State<DateTimePicker> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatefulWidget {
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
+class _DateTimePicker extends State<DateTimePicker> {
   String _date = "Not set";
   String timestart = "Not set";
   String timeend = "Not set";
@@ -108,8 +111,45 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.list_alt),
+            // onPressed: () {
+            //   Navigator.pushNamed(context, timeList).then((dynamic object) {
+            //     print(object);
+            //     if (object != null) {
+            //       tasks = object["Tasks"];
+            //       limit = object["limit"];
+            //     }
+            //     setState(() {});
+            //   });
+            //   // dynamic content =
+            //   //     await Navigator.push(context, MaterialPageRoute(
+            //   //   builder: (BuildContext context) {
+            //   //     return TodoList();
+            //   //   },
+            //   // ));
+            //   // if (await content != null) {
+            //   //   tasks = content["Tasks"];
+            //   //   limit = content["limit"];
+            //   // }
+            // }
             onPressed: () {
-              print(limit);
+              Navigator.pushNamed(context, timeList).then((dynamic object) {
+                print(object);
+                if (object != null) {
+                  tasks = object["Tasks"];
+                  limit = object["limit"];
+                }
+                setState(() {});
+              });
+              // dynamic content =
+              //     await Navigator.push(context, MaterialPageRoute(
+              //   builder: (BuildContext context) {
+              //     return TodoList();
+              //   },
+              // ));
+              // if (await content != null) {
+              //   tasks = content["Tasks"];
+              //   limit = content["limit"];
+              // }
             },
           )
         ],
@@ -131,9 +171,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Row(
                     children: <Widget>[
-                      Text("Time Remaining: ",
-                          style: TextStyle(fontSize: 20, color: Colors.white)),
-                      Text(limit > 0 ? convert(limit) : " 00:00",
+                      (limit <= 0
+                          ? Text("Extra Time Remaining: ",
+                              style:
+                                  TextStyle(fontSize: 20, color: Colors.white))
+                          : Text("Time Remaining: ",
+                              style: TextStyle(
+                                  fontSize: 20, color: Colors.white))),
+                      Text(limit > 0 ? convert(limit) : convert(-limit),
                           style: TextStyle(fontSize: 20, color: Colors.white)),
                     ],
                   )),
@@ -525,6 +570,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       timeend = "Not set";
                       limit -= duration;
                       print(limit);
+                      Utility.writeIntoTime(time);
+                      Utility.writeIntoTask({
+                        "limit": limit,
+                        "Tasks": tasks,
+                      });
                       setState(() {});
                       print(time);
                     },

@@ -136,12 +136,13 @@ class Utility {
           taskContent["limit"] += timeList[i]["duration"];
           timeList.remove(timeList[i]);
         } else if (starttime.isBefore(curr)) {
-          timeContent[i]["startTime"] =
-              (curr.hour < 10 ? curr.hour.toString() : curr.hour.toString()) +
-                  ":" +
-                  (curr.minute < 10
-                      ? curr.minute.toString()
-                      : curr.minute.toString());
+          timeContent[i]["startTime"] = (curr.hour < 10
+                  ? "0" + curr.hour.toString()
+                  : curr.hour.toString()) +
+              ":" +
+              (curr.minute < 10
+                  ? "0" + curr.minute.toString()
+                  : curr.minute.toString());
           int x = timeContent[i]["duration"];
           timeContent[i]["duration"] = endtime.difference(curr).inMinutes;
           taskContent["limit"] += (x - timeContent[i]["duration"]);
@@ -345,39 +346,6 @@ class Utility {
     // }
 
     if (ttData != null) Utility.writeIntoTimeTable(tt);
-    // Utility.
-    // Utility.localFileTask.then((file) {
-    //   file.exists().then((status) {
-    //     if (status) {
-    //       file.readAsString().then((content) {
-    //         Map<String, dynamic> object = jsonDecode(content);
-    //         List<dynamic> tasks = object["Tasks"];
-    //         for (int i = 0; i < tasks.length; i++) {
-    //           if (tasks[i]["name"] == widget.tasks.subject) {
-    //             tasks[i]["time"] += widget.tasks.startTime
-    //                 .difference(widget.tasks.endTime)
-    //                 .inMinutes;
-    //             if (tasks[i]["time"] <= 0) {
-    //               tasks.remove(tasks[i]);
-    //             }
-    //             print(object["limit"]);
-    //             int k = diff(widget.tasks.startTime.isBefore(DateTime.now())
-    //                     ? DateTime.now().add(Duration(minutes: 15))
-    //                     : widget.tasks.startTime)
-    //                 .difference(widget.tasks.endTime)
-    //                 .inMinutes;
-    //             print(k);
-    //             object["limit"] += k;
-    //             print(object["limit"]);
-    //             break;
-    //           }
-    //         }
-    //         file.writeAsString(jsonEncode(object), mode: FileMode.writeOnly);
-    //       });
-    //       }
-    //     });
-    //   });
-    // });
   }
 
   static Future<dynamic> editTask(dynamic task) async {
@@ -404,6 +372,48 @@ class Utility {
       Utility.writeIntoTask({"limit": limit, "Tasks": tasks});
       return {"limit": limit, "Tasks": tasks};
     }
+  }
+
+  static Future<dynamic> deleteTime(param0, dtime) async {
+    dynamic tasksData = await Utility.readFromTask();
+    List<dynamic> tasks = [];
+    int limit = 0;
+    if (tasksData != null) {
+      tasks = tasksData["Tasks"];
+      limit = tasksData["limit"];
+    }
+    // if (task != null) {
+    //   for (int i = 0; i < tasks.length; i++) {
+    //     if (tasks[i]["name"] == task["name"]) {
+    //       DateTime startTime = DateTime.parse(task["startTime"]);
+    //       DateTime endTime = DateTime.parse(task["endTime"]);
+    //       // tasks[i]["time"] += startTime.difference(endTime).inMinutes;
+    //       tasks.remove(tasks[i]);
+    //       // print(object["limit"]);
+    //       int k = diff(startTime.isBefore(DateTime.now())
+    //               ? DateTime.now().add(Duration(minutes: 0))
+    //               : startTime)
+    //           .difference(endTime)
+    //           .inMinutes;
+    //       print(k);
+    //       limit += k;
+    //       // print(object["limit"]);
+    //       break;
+    //     }
+    //   }
+    // } else {
+    //   for (int i = 0; i < tasks.length; i++) {
+    //     if (tasks[i]["name"] == name) {
+    //       limit -= tasks[i]["time"] as int;
+    //       tasks.remove(tasks[i]);
+    //       break;
+    //     }
+    //   }
+    // }
+    // if (tasksData != null) {
+    //   Utility.writeIntoTask({"limit": limit, "Tasks": tasks});
+    //   return {"limit": limit, "Tasks": tasks};
+    // }
   }
 }
 

@@ -1,3 +1,4 @@
+import 'package:fix_my_life/time_update.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'timetable.dart';
@@ -5,6 +6,7 @@ import 'taskframe.dart';
 import 'utility.dart';
 import 'time_input_frame.dart';
 
+const timeList = "/timeList";
 void main() => runApp(MyApp());
 
 /// This Widget is the main application widget.
@@ -16,7 +18,12 @@ class MyApp extends StatelessWidget {
       home: MyNavigationBar(),
       // initialRoute: '/',
       routes: {
-        todoList: (context) => TodoList(),
+        timeList: (context) {
+          return TimeList();
+        },
+        todoList: (context) {
+          return TodoList();
+        },
       },
     );
   }
@@ -30,7 +37,7 @@ class MyNavigationBar extends StatefulWidget {
 }
 
 class _MyNavigationBarState extends State<MyNavigationBar> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 2;
   static List<Widget> _widgetOptions = <Widget>[
     TaskFrame(),
     DateTimePicker(),
@@ -39,6 +46,7 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
 
   void _onItemTapped(int index) {
     setState(() {
+      k = 1;
       // Utility.localFileTime.then((file) {
       //   file.delete();
       // });

@@ -9,6 +9,7 @@ import 'task_body.dart';
 import 'utility.dart';
 
 const TaskDetailRoute = '/task_detail';
+var k = 0;
 
 class Timetable extends StatelessWidget {
   const Timetable({Key? key}) : super(key: key);
@@ -131,7 +132,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
                       textStyle: TextStyle(color: Colors.white),
                       todayBackgroundColor: Colors.orange[300],
                       leadingDatesBackgroundColor: Colors.grey[700])),
-              view: CalendarView.day,
+              view: k == 0 ? CalendarView.month : CalendarView.day,
 
               allowedViews: [CalendarView.day, CalendarView.month],
               onViewChanged: viewChanged,

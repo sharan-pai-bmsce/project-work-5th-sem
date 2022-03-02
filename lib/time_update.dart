@@ -6,21 +6,21 @@ import 'package:flutter/material.dart';
 // import 'package:fix_my_life/moduls/task.dart';
 // import 'package:fix_my_life/service/task_service.dart';
 
-class TodoList extends StatefulWidget {
-  const TodoList({Key? key}) : super(key: key);
+class TimeList extends StatefulWidget {
+  const TimeList({Key? key}) : super(key: key);
 
   @override
-  _TodoListState createState() => _TodoListState();
+  _TimeListState createState() => _TimeListState();
 }
 
-class _TodoListState extends State<TodoList> {
+class _TimeListState extends State<TimeList> {
   var _taskNameController = TextEditingController();
   var _taskDescriptionController = TextEditingController();
   var _taskPriorityController = TextEditingController();
   var _taskDurationController = TextEditingController();
 
   int limit = 0;
-  List<dynamic> tasks = [];
+  List<dynamic> time = [];
 
   var _edittaskNameController = TextEditingController();
   var _edittaskDescriptionController = TextEditingController();
@@ -29,11 +29,10 @@ class _TodoListState extends State<TodoList> {
   @override
   void initState() {
     super.initState();
-    Utility.readFromTask().then((contents) {
+    Utility.readFromTime().then((contents) {
       print(contents);
       if (contents != null) {
-        limit = contents["limit"];
-        tasks = contents["Tasks"];
+        time = contents;
       }
       setState(() {});
     });
@@ -43,8 +42,8 @@ class _TodoListState extends State<TodoList> {
   // final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
   // getAllTasks() async {
-  //   var tasks = await _taskService.readTasks();
-  //   tasks.forEach((task) {
+  //   var time = await _taskService.readTasks();
+  //   time.forEach((task) {
   //     setState(() {
   //       var taskModel = Task();
   //       taskModel.name = task['name'];
@@ -57,9 +56,9 @@ class _TodoListState extends State<TodoList> {
   //   });
   // }
 
-  _editTask(BuildContext context, taskName) async {
+  _editTask(BuildContext context, startTime) async {
     Map<String, dynamic> etask =
-        tasks.firstWhere((element) => element["name"] == taskName);
+        time.firstWhere((element) => element["startTime"] == startTime);
     setState(() {
       _edittaskNameController.text = etask['name'] ?? 'No Name';
       _edittaskDescriptionController.text = etask['notes'] ?? 'No Description';
@@ -158,18 +157,18 @@ class _TodoListState extends State<TodoList> {
                     print(await etask);
                     if (await etask == null) {
                       Utility.editTask(task).then((content) {
-                        tasks = content["Tasks"];
+                        time = content["Tasks"];
                         limit = content["limit"];
                         setState(() {});
                       });
                     } else {
                       Utility.editTask(task).then((content) {
-                        tasks = content["Tasks"];
+                        time = content["Tasks"];
                         limit = content["limit"];
                         if (limit <= 0) {
                           Utility.readFromTime().then((time) {
                             time = time as List<dynamic>;
-                            Utility.generateTimetable(time, tasks, limit);
+                            Utility.generateTimetable(time, time, limit);
                           });
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -237,7 +236,7 @@ class _TodoListState extends State<TodoList> {
         });
   }
 
-  _showDeleteDialog(BuildContext context, taskName) {
+  _showDeleteDialog(BuildContext context, startTime) {
     return showDialog(
         context: context,
         barrierDismissible: true,
@@ -255,21 +254,21 @@ class _TodoListState extends State<TodoList> {
               FlatButton(
                   color: Colors.red,
                   onPressed: () async {
-                    dynamic dtask = await Utility.findByNameTimeTable(taskName);
-                    print(await dtask);
-                    if (await dtask == null) {
-                      Utility.deleteTask(null, taskName).then((content) {
-                        tasks = content["Tasks"];
-                        limit = content["limit"];
+                    dynamic dtime = time.firstWhere(
+                        (element) => element["startTime"] == startTime);
+                    print(await dtime);
+                    if (await dtime == null) {
+                      Utility.deleteTime(null, dtime).then((content) {
+                        time = content;
                         setState(() {});
                       });
                     } else {
-                      Utility.deleteTask(dtask, "").then((content) {
-                        tasks = content["Tasks"];
-                        limit = content["limit"];
-                        setState(() {});
-                      });
-                      Utility.deleteTimeTable(dtask);
+                      // Utility.deleteTask(dtask, "").then((content) {
+                      //   time = content["Tasks"];
+                      //   limit = content["limit"];
+                      //   setState(() {});
+                      // });
+                      // Utility.deleteTimeTable(dtask);
                     }
                     Navigator.pop(context);
                     _showSuccessSnackBar(context, Text('Deleted Successfully'));
@@ -300,16 +299,16 @@ class _TodoListState extends State<TodoList> {
         leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.pop(context, {"Tasks": tasks, "limit": limit});
+              Navigator.pop(context, time);
             }),
         title: Text(
-          "Task List",
+          "Time List",
           style: TextStyle(color: Colors.grey[400]),
         ),
         backgroundColor: Colors.grey[850],
       ),
       body: ListView.builder(
-          itemCount: tasks.length,
+          itemCount: time.length,
           itemBuilder: (context, index) {
             return Padding(
               padding: EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
@@ -323,19 +322,20 @@ class _TodoListState extends State<TodoList> {
                       color: Colors.blue,
                     ),
                     onPressed: () {
-                      _editTask(context, tasks[index]["name"]);
+                      _editTask(context, time[index]["startTime"]);
                     },
                   ),
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(
-                        tasks[index]["name"],
+                        time[index]["date"],
                         style: TextStyle(color: Colors.grey[400]),
                       ),
                       IconButton(
                           onPressed: () {
-                            _showDeleteDialog(context, tasks[index]["name"]);
+                            _showDeleteDialog(
+                                context, time[index]["startTime"]);
                           },
                           icon: Icon(
                             Icons.delete,
@@ -343,10 +343,10 @@ class _TodoListState extends State<TodoList> {
                           )),
                     ],
                   ),
-                  subtitle: Text(
-                    tasks[index]["notes"],
-                    style: TextStyle(color: Colors.grey[400]),
-                  ),
+                  // subtitle: Text(
+                  //   time[index]["notes"],
+                  //   style: TextStyle(color: Colors.grey[400]),
+                  // ),
                 ),
               ),
             );

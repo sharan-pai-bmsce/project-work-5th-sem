@@ -107,7 +107,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
                   ).then((value) {
                     if (value == true && x != null) {
                       viewChanged(x!);
-                      setState(() {});
+                      // setState(() {});
                     }
                   });
                 }

@@ -41,23 +41,6 @@ class Utility {
       print(exception);
       return {};
     }
-    // return Utility.localFile1.then((file) {
-    //   return file.readAsString();
-    //   // file.exists().then((stat) {
-    //   //   if (stat) {
-    //   //     file.readAsString().then((contents) {
-    //   //       return jsonDecode(contents);
-    //   //       // setState(() {});
-    //   //     });
-    //   //   }
-    //   // });
-    // }).then((contents) {
-    //   return jsonDecode(contents);
-    //   // setState(() {});
-    // }).catchError((err) {
-    //   print(err);
-    //   return [];
-    // });
   }
 
   static Future<dynamic> readFromTime() async {
@@ -203,13 +186,13 @@ class Utility {
           // tasks[i]["time"] += startTime.difference(endTime).inMinutes;
           tasks.remove(tasks[i]);
           // print(object["limit"]);
-          int k = diff(startTime.isBefore(DateTime.now())
-                  ? DateTime.now().add(Duration(minutes: 0))
+          int k = endTime
+              .difference(startTime.isBefore(DateTime.now())
+                  ? DateTime.now()
                   : startTime)
-              .difference(endTime)
               .inMinutes;
           print(k);
-          limit += k;
+          limit -= k;
           // print(object["limit"]);
           break;
         }
@@ -229,95 +212,101 @@ class Utility {
     }
   }
 
-  static Future<void> generateTimetable(
-      List<dynamic> time, List<dynamic> tasks, int limit) async {
-    List<dynamic> ttData = [];
-    List<Color> _colorCollection = <Color>[
-      Color(0xFF0F8644),
-      Color(0xFF8B1FA9),
-      Color(0xFFD20100),
-      Color(0xFFFC571D),
-      Color(0xFF36B37B),
-      Color(0xFF01A1EF),
-      Color(0xFF3D4FB5),
-      Color(0xFFE47C73),
-      Color(0xFF636363),
-      Color(0xFF0A8043),
-    ];
+  static Future<void> generateTimetable() async {
+    dynamic tasksData = await Utility.readFromTask();
+    dynamic timeData = await Utility.readFromTime();
+    if (tasksData != null && timeData != null) {
+      List<dynamic> tasks = tasksData["Tasks"];
+      int limit = tasksData["limit"];
+      List<dynamic> time = timeData;
+      List<dynamic> ttData = [];
+      List<Color> _colorCollection = <Color>[
+        Color(0xFF0F8644),
+        Color(0xFF8B1FA9),
+        Color(0xFFD20100),
+        Color(0xFFFC571D),
+        Color(0xFF36B37B),
+        Color(0xFF01A1EF),
+        Color(0xFF3D4FB5),
+        Color(0xFFE47C73),
+        Color(0xFF636363),
+        Color(0xFF0A8043),
+      ];
 
-    time.sort((a, b) {
-      if (DateTime.parse(a["date"] + " " + a["startTime"])
-          .isBefore(DateTime.parse(b["date"] + " " + a["endTime"]))) {
-        return -1;
-      }
-      return 1;
-    });
-    print(time);
-    Random random = new Random();
-    int trace = 0;
-    int timeLeft = 0;
-    tasks.sort((a, b) {
-      if (a["priority"] < b["priority"]) {
+      time.sort((a, b) {
+        if (DateTime.parse(a["date"] + " " + a["startTime"])
+            .isBefore(DateTime.parse(b["date"] + " " + a["endTime"]))) {
+          return -1;
+        }
         return 1;
-      } else if (a["priority"] == b["priority"]) {
-        if (a["time"] > b["time"]) {
+      });
+      print(time);
+      Random random = new Random();
+      int trace = 0;
+      int timeLeft = 0;
+      tasks.sort((a, b) {
+        if (a["priority"] < b["priority"]) {
           return 1;
-        } else {
-          return 0;
+        } else if (a["priority"] == b["priority"]) {
+          if (a["time"] > b["time"]) {
+            return 1;
+          } else {
+            return 0;
+          }
         }
-      }
-      return 0;
-    });
-    for (int j = 0; j < time.length; j++) {
-      DateTime start =
-          DateTime.parse(time[j]["date"] + " " + time[j]["startTime"] + ":00");
-      int duration = time[j]["duration"];
-      print(duration);
+        return 0;
+      });
+      for (int j = 0; j < time.length; j++) {
+        DateTime start = DateTime.parse(
+            time[j]["date"] + " " + time[j]["startTime"] + ":00");
+        int duration = time[j]["duration"];
+        print(duration);
 
-      for (int i = trace; i < tasks.length; i++) {
-        if (tasks[i]["time"] - timeLeft <= duration) {
-          ttData.add({
-            "name": tasks[i]["name"],
-            "startTime": start.toString(),
-            "endTime": start
-                .add(Duration(minutes: tasks[i]["time"] - timeLeft))
-                .toString(),
-            "priority": tasks[i]["priority"],
-            "notes": tasks[i]["notes"],
-            "color": _colorCollection[random.nextInt(9)].value,
-            "complete": false,
-          });
-          start = start.add(Duration(minutes: tasks[i]["time"] - timeLeft));
-          duration = (duration + timeLeft - tasks[i]["time"]) as int;
-          trace = i + 1;
-          timeLeft = 0;
-          // tasks.remove(tasks[i]);
-        } else {
-          ttData.add({
-            "name": tasks[i]["name"],
-            "startTime": start.toString(),
-            "endTime": start.add(Duration(minutes: duration)).toString(),
-            "priority": tasks[i]["priority"],
-            "notes": tasks[i]["notes"],
-            "color": _colorCollection[random.nextInt(9)].value,
-            "complete": false,
-          });
-          timeLeft = duration;
-          // tasks[i]["time"] -= duration;
-          break;
+        for (int i = trace; i < tasks.length; i++) {
+          if (tasks[i]["time"] - timeLeft <= duration) {
+            ttData.add({
+              "name": tasks[i]["name"],
+              "startTime": start.toString(),
+              "endTime": start
+                  .add(Duration(minutes: tasks[i]["time"] - timeLeft))
+                  .toString(),
+              "priority": tasks[i]["priority"],
+              "notes": tasks[i]["notes"],
+              "color": _colorCollection[random.nextInt(9)].value,
+              "complete": false,
+            });
+            start = start.add(Duration(minutes: tasks[i]["time"] - timeLeft));
+            duration = (duration - (tasks[i]["time"] - timeLeft)) as int;
+            trace = i + 1;
+            timeLeft = 0;
+            // tasks.remove(tasks[i]);
+          } else {
+            ttData.add({
+              "name": tasks[i]["name"],
+              "startTime": start.toString(),
+              "endTime": start.add(Duration(minutes: duration)).toString(),
+              "priority": tasks[i]["priority"],
+              "notes": tasks[i]["notes"],
+              "color": _colorCollection[random.nextInt(9)].value,
+              "complete": false,
+            });
+            timeLeft = duration;
+            // tasks[i]["time"] -= duration;
+            break;
+          }
         }
       }
+
+      Utility.writeIntoTimeTable(ttData);
+      print(tasks);
+      // print(time);
+      // print(tasks);
+      Utility.writeIntoTask({
+        "limit": limit,
+        "Tasks": tasks,
+      });
+      Utility.writeIntoTime(time);
     }
-
-    Utility.writeIntoTimeTable(ttData);
-    print(tasks);
-    // print(time);
-    // print(tasks);
-    Utility.writeIntoTask({
-      "limit": limit,
-      "Tasks": tasks,
-    });
-    Utility.writeIntoTime(time);
   }
 
   static void deleteTimeTable(Map<String, dynamic> task) async {
@@ -376,44 +365,21 @@ class Utility {
 
   static Future<dynamic> deleteTime(param0, dtime) async {
     dynamic tasksData = await Utility.readFromTask();
-    List<dynamic> tasks = [];
-    int limit = 0;
-    if (tasksData != null) {
-      tasks = tasksData["Tasks"];
-      limit = tasksData["limit"];
+    dynamic timeData = await Utility.readFromTime();
+    if (tasksData != null && timeData != null) {
+      List<dynamic> time = timeData;
+      for (int i = 0; i < time.length; i++) {
+        if (time[i]["startTime"] == dtime["startTime"]) {
+          print(dtime);
+          tasksData["limit"] += time[i]["duration"];
+          time.remove(time[i]);
+          break;
+        }
+      }
+      Utility.writeIntoTime(time);
+      Utility.writeIntoTask(tasksData);
+      return time;
     }
-    // if (task != null) {
-    //   for (int i = 0; i < tasks.length; i++) {
-    //     if (tasks[i]["name"] == task["name"]) {
-    //       DateTime startTime = DateTime.parse(task["startTime"]);
-    //       DateTime endTime = DateTime.parse(task["endTime"]);
-    //       // tasks[i]["time"] += startTime.difference(endTime).inMinutes;
-    //       tasks.remove(tasks[i]);
-    //       // print(object["limit"]);
-    //       int k = diff(startTime.isBefore(DateTime.now())
-    //               ? DateTime.now().add(Duration(minutes: 0))
-    //               : startTime)
-    //           .difference(endTime)
-    //           .inMinutes;
-    //       print(k);
-    //       limit += k;
-    //       // print(object["limit"]);
-    //       break;
-    //     }
-    //   }
-    // } else {
-    //   for (int i = 0; i < tasks.length; i++) {
-    //     if (tasks[i]["name"] == name) {
-    //       limit -= tasks[i]["time"] as int;
-    //       tasks.remove(tasks[i]);
-    //       break;
-    //     }
-    //   }
-    // }
-    // if (tasksData != null) {
-    //   Utility.writeIntoTask({"limit": limit, "Tasks": tasks});
-    //   return {"limit": limit, "Tasks": tasks};
-    // }
   }
 }
 

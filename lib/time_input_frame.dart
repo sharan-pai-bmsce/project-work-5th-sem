@@ -42,6 +42,7 @@ class _DateTimePicker extends State<DateTimePicker> {
   Map<String, dynamic> fileContents = {};
   DateTime now = DateTime.now();
   int limit = 0;
+  int type = 0;
   Widget _buildAboutText() {
     return new RichText(
         text: new TextSpan(
@@ -53,7 +54,11 @@ class _DateTimePicker extends State<DateTimePicker> {
 
   Widget _buildAboutDialog(BuildContext context) {
     return new AlertDialog(
-      title: const Text('Error!'),
+      title: type == 0
+          ? Text('Error!',
+              style: TextStyle(color: Color(Colors.red[300]!.value)))
+          : Text("Success!",
+              style: TextStyle(color: Color(Colors.green[300]!.value))),
       content: new Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +78,8 @@ class _DateTimePicker extends State<DateTimePicker> {
     );
   }
 
-  Widget needed(BuildContext context, String mes) {
+  Widget needed(BuildContext context, String mes, int type) {
+    this.type = type;
     message = mes;
     return _buildAboutDialog(context);
   }
@@ -135,8 +141,23 @@ class _DateTimePicker extends State<DateTimePicker> {
               Navigator.pushNamed(context, timeList).then((dynamic object) {
                 print(object);
                 if (object != null) {
-                  tasks = object["Tasks"];
-                  limit = object["limit"];
+                  time = object;
+                  Utility.readFromTask().then((object) {
+                    limit = object["limit"];
+                    if (limit <= 0) {
+                      Utility.generateTimetable();
+                    } else {
+                      Utility.writeIntoTimeTable([]);
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          backgroundColor: Colors.redAccent[50],
+                          content: Text(
+                            'Cannot accommodate tasks. Add time and then generate timetable.',
+                            style: TextStyle(color: Colors.redAccent),
+                          )));
+                      setState(() {});
+                    }
+                    setState(() {});
+                  });
                 }
                 setState(() {});
               });
@@ -285,8 +306,10 @@ class _DateTimePicker extends State<DateTimePicker> {
                     if (_date == "Not set") {
                       showDialog(
                         context: context,
-                        builder: (BuildContext context) => needed(context,
-                            'Set the date before setting the start timer.\n\n'),
+                        builder: (BuildContext context) => needed(
+                            context,
+                            'Set the date before setting the start timer.\n\n',
+                            0),
                       );
                       setState(() {});
                       return;
@@ -303,8 +326,10 @@ class _DateTimePicker extends State<DateTimePicker> {
                       print('end time $td greater than start');
                       showDialog(
                         context: context,
-                        builder: (BuildContext context) => needed(context,
-                            'Free End time can\'t be greater than Start Time\n\n'),
+                        builder: (BuildContext context) => needed(
+                            context,
+                            'Free End time can\'t be greater than Start Time\n\n',
+                            0),
                       );
                     } else if (d.isBefore(DateTime.now())) {
                       print("Time less than current time.");
@@ -312,7 +337,7 @@ class _DateTimePicker extends State<DateTimePicker> {
                       showDialog(
                           context: context,
                           builder: (BuildContext context) => needed(
-                              context, "Entered time before current time.")
+                              context, "Entered time before current time.", 0)
                           // _buildAboutDialog(context),
                           );
                       setState(() {});
@@ -401,8 +426,10 @@ class _DateTimePicker extends State<DateTimePicker> {
                     if (_date == "Not set") {
                       showDialog(
                         context: context,
-                        builder: (BuildContext context) => needed(context,
-                            'Set the date before setting the end timer.\n\n'),
+                        builder: (BuildContext context) => needed(
+                            context,
+                            'Set the date before setting the end timer.\n\n',
+                            0),
                       );
                       setState(() {});
                       return;
@@ -421,15 +448,17 @@ class _DateTimePicker extends State<DateTimePicker> {
                       print('end time $time greater than start');
                       showDialog(
                         context: context,
-                        builder: (BuildContext context) => needed(context,
-                            'Free End time can\'t be greater than Start Time\n\n'),
+                        builder: (BuildContext context) => needed(
+                            context,
+                            'Free End time can\'t be greater than Start Time\n\n',
+                            0),
                       );
                     } else if (d.isBefore(DateTime.now())) {
                       print("Time less than current time.");
                       showDialog(
                           context: context,
                           builder: (BuildContext context) => needed(
-                              context, "Entered time before current time.")
+                              context, "Entered time before current time.", 0)
                           // _buildAboutDialog(context),
                           );
                     } else {
@@ -492,8 +521,36 @@ class _DateTimePicker extends State<DateTimePicker> {
                       style: TextStyle(fontSize: 20),
                     ),
                     onPressed: () {
-                      Utility.generateTimetable(time, tasks, limit)
-                          .then((value) {});
+                      if (limit > 0) {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) => needed(
+                                context,
+                                "Cannot generate timetable. Add more time to generate timetable.",
+                                0)
+                            // _buildAboutDialog(context),
+                            );
+                        return;
+                      }
+                      if (tasks.length == 0) {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) => needed(
+                                context,
+                                "Cannot generate timetable. Add tasks to generate timetable.",
+                                0)
+                            // _buildAboutDialog(context),
+                            );
+                        return;
+                      }
+                      Utility.generateTimetable().then((value) {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) => needed(
+                                context, "Timetable successfully generated.", 1)
+                            // _buildAboutDialog(context),
+                            );
+                      });
                     },
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0)),
@@ -514,8 +571,8 @@ class _DateTimePicker extends State<DateTimePicker> {
                       if (timestart == "Not set") {
                         showDialog(
                             context: context,
-                            builder: (BuildContext context) => needed(
-                                context, "Cannot add time without start time!")
+                            builder: (BuildContext context) => needed(context,
+                                "Cannot add time without start time!", 0)
                             // _buildAboutDialog(context),
                             );
                         print(limit);
@@ -526,7 +583,7 @@ class _DateTimePicker extends State<DateTimePicker> {
                         showDialog(
                             context: context,
                             builder: (BuildContext context) => needed(
-                                context, "Cannot add time without end time!")
+                                context, "Cannot add time without end time!", 0)
                             // _buildAboutDialog(context),
                             );
                         setState(() {});
@@ -535,8 +592,8 @@ class _DateTimePicker extends State<DateTimePicker> {
                       if (_date == "Not set") {
                         showDialog(
                             context: context,
-                            builder: (BuildContext context) =>
-                                needed(context, "Cannot add time without date!")
+                            builder: (BuildContext context) => needed(
+                                context, "Cannot add time without date!", 0)
                             // _buildAboutDialog(context),
                             );
                         setState(() {});
@@ -556,7 +613,7 @@ class _DateTimePicker extends State<DateTimePicker> {
                         showDialog(
                             context: context,
                             builder: (BuildContext context) =>
-                                needed(context, "Time range already given!")
+                                needed(context, "Time range already given!", 0)
                             // _buildAboutDialog(context),
                             );
                         timestart = "Not set";

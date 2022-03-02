@@ -168,7 +168,7 @@ class _TimeListState extends State<TimeList> {
                         if (limit <= 0) {
                           Utility.readFromTime().then((time) {
                             time = time as List<dynamic>;
-                            Utility.generateTimetable(time, time, limit);
+                            Utility.generateTimetable();
                           });
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -257,7 +257,7 @@ class _TimeListState extends State<TimeList> {
                     dynamic dtime = time.firstWhere(
                         (element) => element["startTime"] == startTime);
                     print(await dtime);
-                    if (await dtime == null) {
+                    if (await dtime != null) {
                       Utility.deleteTime(null, dtime).then((content) {
                         time = content;
                         setState(() {});
@@ -316,20 +316,24 @@ class _TimeListState extends State<TimeList> {
                 color: Colors.grey[850],
                 elevation: 8.0,
                 child: ListTile(
-                  leading: IconButton(
-                    icon: Icon(
-                      Icons.edit,
-                      color: Colors.blue,
-                    ),
-                    onPressed: () {
-                      _editTask(context, time[index]["startTime"]);
-                    },
-                  ),
+                  // leading: IconButton(
+                  //   icon: Icon(
+                  //     Icons.edit,
+                  //     color: Colors.blue,
+                  //   ),
+                  //   onPressed: () {
+                  //     _editTask(context, time[index]["startTime"]);
+                  //   },
+                  // ),
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(
-                        time[index]["date"],
+                        time[index]["date"] +
+                            ": " +
+                            time[index]["startTime"] +
+                            "-" +
+                            time[index]["endTime"],
                         style: TextStyle(color: Colors.grey[400]),
                       ),
                       IconButton(

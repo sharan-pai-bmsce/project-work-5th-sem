@@ -57,11 +57,11 @@ class _TaskDetailState extends State<TaskDetail> {
                       "startTime": widget.tasks.startTime.toString(),
                       "endTime": widget.tasks.endTime.toString(),
                     };
-                    setState(() {
-                      Utility.deleteTask(tasks, "");
-                      Utility.deleteTimeTable(tasks);
+                    Utility.deleteTask(tasks, "").then((object) {
+                      Utility.generateTimetable()
+                          .then((val) => Navigator.pop(context, true));
                     });
-                    Navigator.pop(context);
+                    // Utility.deleteTimeTable(tasks);
                   },
                 )
               ]

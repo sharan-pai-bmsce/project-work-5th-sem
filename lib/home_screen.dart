@@ -148,6 +148,44 @@ class _TodoListState extends State<TodoList> {
               FlatButton(
                   color: Colors.blue,
                   onPressed: () async {
+                    if (_edittaskNameController.text.length < 1) {
+                      _edittaskNameController.clear();
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          backgroundColor: Colors.redAccent[50],
+                          content: Text(
+                            'Title Not entered properly',
+                            style: TextStyle(color: Colors.redAccent),
+                          )));
+                      setState(() {});
+                      return;
+                    }
+                    print(_edittaskPriorityController.text +
+                        " " +
+                        _edittaskPriorityController.text.isEmpty.toString());
+                    if (_edittaskPriorityController.text.isEmpty ||
+                        (int.parse(_edittaskPriorityController.text) >= 1 &&
+                            int.parse(_edittaskPriorityController.text) <= 5)) {
+                      _edittaskPriorityController.clear();
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          backgroundColor: Colors.redAccent[50],
+                          content: Text(
+                            'Priority Not entered properly',
+                            style: TextStyle(color: Colors.redAccent),
+                          )));
+                      setState(() {});
+                      return;
+                    }
+                    // if (_edittaskPriorityController.text.length >= 1) {
+                    //   _edittaskPriorityController.clear();
+                    //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    //       backgroundColor: Colors.redAccent[50],
+                    //       content: Text(
+                    //         'Priority Not entered properly',
+                    //         style: TextStyle(color: Colors.redAccent),
+                    //       )));
+                    //   setState(() {});
+                    //   return;
+                    // }
                     task["name"] = _edittaskNameController.text;
                     task["notes"] = _edittaskDescriptionController.text;
                     task['priority'] =
@@ -169,7 +207,7 @@ class _TodoListState extends State<TodoList> {
                         if (limit <= 0) {
                           Utility.readFromTime().then((time) {
                             time = time as List<dynamic>;
-                            Utility.generateTimetable(time, tasks, limit);
+                            Utility.generateTimetable();
                           });
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -216,6 +254,7 @@ class _TodoListState extends State<TodoList> {
                   ),
                   TextField(
                     controller: _edittaskPriorityController,
+                    keyboardType: TextInputType.number,
                     style: TextStyle(color: Colors.grey[400]),
                     decoration: InputDecoration(
                         hintText: 'Write a Priority',
@@ -224,6 +263,7 @@ class _TodoListState extends State<TodoList> {
                   ),
                   TextField(
                     controller: _edittasDurationController,
+                    keyboardType: TextInputType.number,
                     style: TextStyle(color: Colors.grey[400]),
                     decoration: InputDecoration(
                         hintText: 'Write a Duration',

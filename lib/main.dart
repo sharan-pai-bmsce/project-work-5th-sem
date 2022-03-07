@@ -1,7 +1,12 @@
+import 'package:fix_my_life/time_update.dart';
 import 'package:flutter/material.dart';
-// import 'timetable.dart';
-// import 'taskframe.dart';
+import 'home_screen.dart';
+import 'timetable.dart';
+import 'taskframe.dart';
+import 'utility.dart';
+import 'time_input_frame.dart';
 
+const timeList = "/timeList";
 void main() => runApp(MyApp());
 
 /// This Widget is the main application widget.
@@ -9,7 +14,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: MyNavigationBar(),
+      // initialRoute: '/',
+      routes: {
+        timeList: (context) {
+          return TimeList();
+        },
+        todoList: (context) {
+          return TodoList();
+        },
+      },
     );
   }
 }
@@ -22,20 +37,16 @@ class MyNavigationBar extends StatefulWidget {
 }
 
 class _MyNavigationBarState extends State<MyNavigationBar> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 2;
   static List<Widget> _widgetOptions = <Widget>[
-    // TaskFrame(),
-    Text('Home Page',
-        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
-    Text('Search Page',
-        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
-    Text('Profile Page',
-        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
-    // AppointmentWithoutWeekends(),
+    TaskFrame(),
+    DateTimePicker(),
+    Timetable(),
   ];
 
   void _onItemTapped(int index) {
     setState(() {
+      k = 1;
       _selectedIndex = index;
     });
   }
@@ -49,13 +60,13 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
       bottomNavigationBar: BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: ('Time Input'),
+              icon: Icon(Icons.task_sharp),
+              label: ('Task Input'),
               backgroundColor: Colors.grey[850],
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.task_sharp),
-              label: ('Task Input'),
+              icon: Icon(Icons.access_alarms),
+              label: ('Time Input'),
               backgroundColor: Colors.grey[850],
             ),
             BottomNavigationBarItem(

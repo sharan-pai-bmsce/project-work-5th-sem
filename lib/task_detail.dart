@@ -25,14 +25,10 @@ class _TaskDetailState extends State<TaskDetail> {
   void initState() {
     timLabel = time(widget.tasks.startTime, widget.tasks.endTime);
     tim = timeLeft(widget.tasks.startTime, widget.tasks.endTime);
-    // Timer.periodic(Duration(minutes: 1), (Timer t) => setState(() {}));
-    // super.initState();
   }
 
   @override
   void dispose() {
-    // _time!.cancel();
-    // _time = null;
     super.dispose();
   }
 
@@ -58,15 +54,20 @@ class _TaskDetailState extends State<TaskDetail> {
                       "endTime": widget.tasks.endTime.toString(),
                     };
                     Utility.deleteTask(tasks, "").then((object) {
-                      Utility.generateTimetable()
-                          .then((val) => Navigator.pop(context, true));
+                      Utility.eliminatepreviousTime().then((val) {
+                        if (val > 0) {
+                          Utility.writeIntoTimeTable([]);
+                          Navigator.pop(context, false);
+                          return;
+                        }
+                        Utility.generateTimetable()
+                            .then((val) => Navigator.pop(context, true));
+                      });
                     });
-                    // Utility.deleteTimeTable(tasks);
                   },
                 )
               ]
             : [],
-        // foregroundColor: widget.tasks["color"],
       ),
       backgroundColor: Colors.grey[850],
       body: SingleChildScrollView(

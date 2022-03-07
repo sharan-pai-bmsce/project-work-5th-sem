@@ -47,15 +47,6 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
   void _onItemTapped(int index) {
     setState(() {
       k = 1;
-      // Utility.localFileTime.then((file) {
-      //   file.delete();
-      // });
-      // Utility.localFileTimeTable.then((file) {
-      //   file.delete();
-      // });
-      // Utility.localFileTask.then((file) {
-      //   file.delete();
-      // });
       _selectedIndex = index;
     });
   }

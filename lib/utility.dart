@@ -1,5 +1,3 @@
-// ignore_for_file: await_only_futures
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -101,13 +99,27 @@ class Utility {
     });
   }
 
-  static Future<void> eliminatepreviousTime() async {
+  static Future<dynamic> eliminatepreviousTime() async {
     dynamic timeContent = await Utility.readFromTime();
     dynamic taskContent = await Utility.readFromTask();
     List<dynamic> timeList = [];
     if (timeContent != null) timeList = timeContent;
     if (timeContent != null && taskContent != null) {
       DateTime curr = DateTime.now();
+      String format = curr.year.toString() +
+          "-" +
+          (curr.month < 10 ? "0" : "") +
+          curr.month.toString() +
+          "-" +
+          (curr.day < 10 ? "0" : "") +
+          curr.day.toString() +
+          " " +
+          (curr.hour < 10 ? "0" + curr.hour.toString() : curr.hour.toString()) +
+          ":" +
+          (curr.minute < 10
+              ? "0" + curr.minute.toString()
+              : curr.minute.toString());
+      curr = DateTime.parse(format + ":00");
       // print(taskContent);
       print(timeContent);
       for (int i = 0; i < timeList.length; i++) {
@@ -136,34 +148,21 @@ class Utility {
       Utility.writeIntoTime(timeList);
       Utility.writeIntoTask(
           {"limit": taskContent["limit"], "Tasks": taskContent["Tasks"]});
+      return taskContent["limit"];
     }
   }
 
-  static void eliminatepreviousTask() async {
-    // dynamic tasksData = await Utility.readFromTask();
+  static Future<void> eliminatepreviousTask() async {
     dynamic ttData = await Utility.readFromTimeTable();
     List<dynamic> tasks = [], tt = [];
-    // if (tasksData != null) tasks = tasksData["Tasks"];
     if (ttData != null) tt = ttData;
     if (ttData != null) {
       for (int i = 0; i < tt.length; i++) {
         DateTime startTime = DateTime.parse(tt[i]["startTime"]);
         DateTime endTime = DateTime.parse(tt[i]["endTime"]);
         if (endTime.isBefore(DateTime.now())) {
-          // for (int j = 0; j < tasks.length; j++) {
-          //   if (tasks[j]["name"] == tt[i]["name"]) {
-          //     int k = endTime.difference(startTime).inMinutes;
-          //     tasks[j]["time"] -= k;
-          //     // tasksData["limit"] += k;
-          //     // if (tasks[j]["time"] <= 0) {
-          //     //   tasks.remove(tasks[j]);
-          //     // }
-          //     break;
-          //   }
-          // }
           tt.remove(tt[i]);
         }
-        // Utility.writeIntoTask({"limit": tasksData["limit"], "Tasks": tasks});
         Utility.writeIntoTimeTable(tt);
       }
     }
@@ -310,30 +309,12 @@ class Utility {
   }
 
   static void deleteTimeTable(Map<String, dynamic> task) async {
-    // Utility.localFileTimeTable.then((file) {
-    //   file.exists().then((status) {
-    //     if (status) {
-    //       file.readAsString().then((content) {
-    //         List<dynamic> tasks = jsonDecode(content);
-    //         tasks.removeWhere((element) =>
-    //             element["startTime"] == widget.tasks.startTime.toString());
-    //         if (tasks.isEmpty) tasks = [];
-    //         file.writeAsString(jsonEncode(tasks), mode: FileMode.writeOnly);
-    //         Navigator.pop(context, true);
-    //       });
-    //     }
-    //   });
     dynamic ttData = await Utility.readFromTimeTable();
     List<dynamic> tt = [];
 
     if (ttData != null) tt = await ttData;
     print(task["startTime"]);
     tt.removeWhere((ele) => ele["subject"] == task["subject"]);
-
-    // if (tt.isNotEmpty) {
-    //   tt = [];
-    // }
-
     if (ttData != null) Utility.writeIntoTimeTable(tt);
   }
 

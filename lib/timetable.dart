@@ -17,8 +17,6 @@ class Timetable extends StatelessWidget {
     return (settings) {
       Widget screen;
       Task arguments = settings.arguments as Task;
-      // print(arguments);
-      // print(arguments.toString());
       switch (settings.name) {
         case '/':
           screen = AppointmentWithoutWeekends();
@@ -60,7 +58,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
     super.initState();
     setState(() {
       Utility.eliminatepreviousTime()
-          .then((value) => Utility.eliminatepreviousTask());
+          .then((value) => Utility.generateTimetable());
     });
   }
 
@@ -105,9 +103,17 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
                     // (Route<dynamic> route) => false,
                     arguments: app,
                   ).then((value) {
+                    if (value == false) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          backgroundColor: Colors.redAccent[50],
+                          content: Text(
+                            'Cannot generate timetable. Add more time to generate',
+                            style: TextStyle(color: Colors.redAccent),
+                          )));
+                      setState(() {});
+                    }
                     if (value == true && x != null) {
                       viewChanged(x!);
-                      // setState(() {});
                     }
                   });
                 }
@@ -140,10 +146,6 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.edit),
-            backgroundColor: Colors.grey[800],
-            onPressed: () {}),
       ),
     );
   }
@@ -156,8 +158,7 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
     x = viewChangedDetails;
     // This will refresh the window each time the window is loaded. For example when you switch from from 1 date to another previous appointment details will be present and new details will be loaded. This will scrub the previous data and
     _dataSource.appointments!.clear();
-    // DateTime x = DateTime.now();
-    // DateTime start = DateTime(x.year, x.month, x.day, 12, 30);
+
     Utility.readFromTimeTable().then((contents) {
       if (contents == null) return;
       appointments.clear();
@@ -177,43 +178,6 @@ class CalendarAppointment extends State<AppointmentWithoutWeekends> {
       _dataSource.notifyListeners(
           CalendarDataSourceAction.reset, _dataSource.appointments!);
     });
-    // appointments.clear();
-    // file.exists().then((value) {
-    //   print(value);
-    //   appointments.clear();
-    //   _dataSource.appointments!.clear();
-    //   if (value) {
-    //     file.readAsString().then((content) {
-    //       appointments.clear();
-    //       for (var element in val) {
-    //         element.putIfAbsent("start", () => start);
-    //         element.putIfAbsent(
-    //             "end", () => start.add(Duration(minutes: element["time"])));
-    //         start = start.add(Duration(minutes: element["time"]));
-    //       }
-    //       for (var element in val) {
-    //         DateTime startTime = DateTime(
-    //             element["start"].year,
-    //             element["start"].month,
-    //             element["start"].day,
-    //             element["start"].hour,
-    //             element["start"].minute);
-    //         DateTime endTime = DateTime(
-    //             element["end"].year,
-    //             element["end"].month,
-    //             element["end"].day,
-    //             element["end"].hour,
-    //             element["end"].minute);
-    //         var random = Random();
-    //       }
-    //       // print(_dataSource.appointments.toString());
-    //       for (int i = 0; i < appointments.length; i++) {
-    //         _dataSource.appointments!.add(appointments[i]);
-    //       }
-
-    // });
-    // }
-    // });
 
     _dataSource.notifyListeners(
         CalendarDataSourceAction.reset, _dataSource.appointments!);

@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:fix_my_life/utility.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-// import 'package:fix_my_life/moduls/task.dart';
-// import 'package:fix_my_life/service/task_service.dart';
 
 class TodoList extends StatefulWidget {
   const TodoList({Key? key}) : super(key: key);
@@ -14,11 +12,6 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
-  var _taskNameController = TextEditingController();
-  var _taskDescriptionController = TextEditingController();
-  var _taskPriorityController = TextEditingController();
-  var _taskDurationController = TextEditingController();
-
   int limit = 0;
   List<dynamic> tasks = [];
 
@@ -37,25 +30,7 @@ class _TodoListState extends State<TodoList> {
       }
       setState(() {});
     });
-    // getAllTasks();
   }
-
-  // final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
-
-  // getAllTasks() async {
-  //   var tasks = await _taskService.readTasks();
-  //   tasks.forEach((task) {
-  //     setState(() {
-  //       var taskModel = Task();
-  //       taskModel.name = task['name'];
-  //       taskModel.description = task['description'];
-  //       taskModel.id = task['id'];
-  //       taskModel.priority = task['priority'];
-  //       taskModel.duration = task['duration'];
-  //       _taskList.add(taskModel);
-  //     });
-  //   });
-  // }
 
   _editTask(BuildContext context, taskName) async {
     Map<String, dynamic> etask =
@@ -67,67 +42,6 @@ class _TodoListState extends State<TodoList> {
       _edittasDurationController.text = etask['time'].toString();
     });
     _showEditDialog(context, etask);
-  }
-
-  _showFormDialog(BuildContext context) {
-    return showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (param) {
-          return AlertDialog(
-            actions: <Widget>[
-              FlatButton(
-                  color: Colors.red,
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Cancel')),
-              FlatButton(
-                  color: Colors.blue,
-                  onPressed: () async {
-                    // _task.name = _taskNameController.text;
-                    // _task.description = _taskDescriptionController.text;
-                    // _task.priority = int.parse(_taskPriorityController.text);
-                    // _task.duration = int.parse(_taskDurationController.text);
-
-                    // var result = _taskService.saveTask(_task);
-
-                    // print(await result);
-                    // Navigator.pop(context);
-                    // getAllTasks();
-
-                    _showSuccessSnackBar(context, Text('Added Successfully'));
-                  },
-                  child: Text('Save')),
-            ],
-            title: Text('Enter Task'),
-            content: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    controller: _taskNameController,
-                    decoration: InputDecoration(
-                        hintText: 'Write a Task', labelText: 'Task Name'),
-                  ),
-                  TextField(
-                    controller: _taskDescriptionController,
-                    decoration: InputDecoration(
-                        hintText: 'Write a Description',
-                        labelText: 'Description'),
-                  ),
-                  TextField(
-                    controller: _taskPriorityController,
-                    decoration: InputDecoration(
-                        hintText: 'Give a Priority', labelText: 'Priority'),
-                  ),
-                  TextField(
-                    controller: _taskDurationController,
-                    decoration: InputDecoration(
-                        hintText: 'Give a Duration', labelText: 'Duration'),
-                  )
-                ],
-              ),
-            ),
-          );
-        });
   }
 
   _showEditDialog(BuildContext context, task) {
@@ -163,8 +77,8 @@ class _TodoListState extends State<TodoList> {
                         " " +
                         _edittaskPriorityController.text.isEmpty.toString());
                     if (_edittaskPriorityController.text.isEmpty ||
-                        (int.parse(_edittaskPriorityController.text) >= 1 &&
-                            int.parse(_edittaskPriorityController.text) <= 5)) {
+                        (int.parse(_edittaskPriorityController.text) < 1 ||
+                            int.parse(_edittaskPriorityController.text) > 5)) {
                       _edittaskPriorityController.clear();
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           backgroundColor: Colors.redAccent[50],
@@ -175,17 +89,17 @@ class _TodoListState extends State<TodoList> {
                       setState(() {});
                       return;
                     }
-                    // if (_edittaskPriorityController.text.length >= 1) {
-                    //   _edittaskPriorityController.clear();
-                    //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    //       backgroundColor: Colors.redAccent[50],
-                    //       content: Text(
-                    //         'Priority Not entered properly',
-                    //         style: TextStyle(color: Colors.redAccent),
-                    //       )));
-                    //   setState(() {});
-                    //   return;
-                    // }
+                    if (_edittasDurationController.text.isEmpty) {
+                      _edittasDurationController.clear();
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          backgroundColor: Colors.redAccent[50],
+                          content: Text(
+                            'Priority Not entered properly',
+                            style: TextStyle(color: Colors.redAccent),
+                          )));
+                      setState(() {});
+                      return;
+                    }
                     task["name"] = _edittaskNameController.text;
                     task["notes"] = _edittaskDescriptionController.text;
                     task['priority'] =
@@ -307,9 +221,9 @@ class _TodoListState extends State<TodoList> {
                       Utility.deleteTask(dtask, "").then((content) {
                         tasks = content["Tasks"];
                         limit = content["limit"];
+                        if (limit <= 0) Utility.generateTimetable();
                         setState(() {});
                       });
-                      Utility.deleteTimeTable(dtask);
                     }
                     Navigator.pop(context);
                     _showSuccessSnackBar(context, Text('Deleted Successfully'));
@@ -391,16 +305,6 @@ class _TodoListState extends State<TodoList> {
               ),
             );
           }),
-      // floatingActionButton: FloatingActionButton(
-      //   backgroundColor: Colors.grey[850],
-      //   onPressed: () {
-      //     _showFormDialog(context);
-      //   },
-      //   child: Icon(
-      //     Icons.add,
-      //     color: Colors.grey[400],
-      //   ),
-      // ),
     );
   }
 }

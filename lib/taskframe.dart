@@ -22,14 +22,10 @@ class _TaskFrameState extends State<TaskFrame> {
   TextEditingController titleController = new TextEditingController();
   TextEditingController noteController = new TextEditingController();
 
-  // List<Map<String, dynamic>> tasks = [];
   final List<Color> _colorCollection = <Color>[];
 
   String minConverter(Duration? time) {
     if (time == null) return "Approx. time to complete";
-    // if (time.inMinutes > limit) {
-    //   return "-1";
-    // }
     return time.inMinutes.toString() + " minutes";
   }
 
@@ -65,16 +61,6 @@ class _TaskFrameState extends State<TaskFrame> {
                   }
                   setState(() {});
                 });
-                // dynamic content =
-                //     await Navigator.push(context, MaterialPageRoute(
-                //   builder: (BuildContext context) {
-                //     return TodoList();
-                //   },
-                // ));
-                // if (await content != null) {
-                //   tasks = content["Tasks"];
-                //   limit = content["limit"];
-                // }
               },
             )
           ],
@@ -90,21 +76,6 @@ class _TaskFrameState extends State<TaskFrame> {
                 )),
             child: SingleChildScrollView(
                 child: Column(children: [
-              // Container(
-              //     padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
-              //     margin: EdgeInsets.fromLTRB(30, 30, 30, 5),
-              //     decoration: BoxDecoration(
-              //       borderRadius: BorderRadius.all(Radius.circular(10)),
-              //       color: Colors.grey[700],
-              //     ),
-              //     child: Row(
-              //       children: <Widget>[
-              //         Text("Time Remaining: ",
-              //             style: TextStyle(fontSize: 20, color: Colors.white)),
-              //         Text(convert(limit),
-              //             style: TextStyle(fontSize: 20, color: Colors.white)),
-              //       ],
-              //     )),
               Container(
                 padding: EdgeInsets.fromLTRB(5, 10, 5, 40),
                 margin: EdgeInsets.fromLTRB(30, 20, 30, 40),
@@ -121,9 +92,6 @@ class _TaskFrameState extends State<TaskFrame> {
                           style: TextStyle(color: Colors.white),
                           controller: titleController,
 
-                          // onChanged: (String text) {
-                          //   titleController.clear();
-                          // },
                           decoration: InputDecoration(
                             hintText: "Task Title",
                             hintStyle: TextStyle(color: Colors.white),
@@ -135,6 +103,7 @@ class _TaskFrameState extends State<TaskFrame> {
                             color: Colors.white),
                         title: TextField(
                             controller: priorityController,
+                            keyboardType: TextInputType.number,
                             style: TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               hintText: "Task Priority",
@@ -152,17 +121,7 @@ class _TaskFrameState extends State<TaskFrame> {
                                   initialTime: Duration(minutes: 30),
                                 );
                                 String val = minConverter(resultingDuration);
-                                // if (val == "-1") {
-                                //   ScaffoldMessenger.of(context)
-                                //       .showSnackBar(SnackBar(
-                                //           content: Text(
-                                //     'Choose duration crosses the limit',
-                                //     style: TextStyle(color: Colors.redAccent),
-                                //   )));
-                                //   _time = "Approx. time to complete";
-                                // } else {
                                 _time = val;
-                                // }
                                 setState(() {});
                               },
                               child: Align(
@@ -261,8 +220,6 @@ class _TaskFrameState extends State<TaskFrame> {
                                 EdgeInsets.symmetric(
                                     horizontal: 50, vertical: 0)))))
               ]),
-              // Padding(
-              //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 50))
             ]))));
   }
 }
